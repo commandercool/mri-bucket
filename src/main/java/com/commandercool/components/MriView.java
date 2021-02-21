@@ -7,6 +7,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.swing.JPanel;
 
@@ -23,7 +28,7 @@ public class MriView extends JPanel {
     private int mouseX = 0;
     private int mouseY = 0;
 
-    private LinkedList<Point3D> filled = new LinkedList<>();
+    private ConcurrentLinkedQueue<Point3D> filled = new ConcurrentLinkedQueue<>();
 
     public MriView(String filename) {
         try {
@@ -39,8 +44,9 @@ public class MriView extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 mouseX = e.getX();
                 mouseY = e.getY();
-                floodFill();
-                repaint();
+                new Thread(() -> {
+                    floodFill();
+                }).start();
             }
 
             public void mousePressed(MouseEvent e) {
@@ -66,14 +72,14 @@ public class MriView extends JPanel {
         final short ny = volume.header.dim[2];
         double reference = volume.data.get(x, ny - 1 - mouseY / SCALE, mouseX / SCALE, 0);
 
-        filled = new LinkedList<>();
+        filled = new ConcurrentLinkedQueue<>();
         LinkedList<Point3D> rejected = new LinkedList<>();
         LinkedList<Point3D> toFill = new LinkedList<>();
 
         toFill.add(new Point3D(mouseX / SCALE, mouseY / SCALE, x));
 
         while (!toFill.isEmpty()) {
-            final Point3D n = toFill.pop();
+            final Point3D n = toFill.poll();
             if (Math.abs(reference - valueAt(n)) < 100) {
                 filled.add(n);
                 System.out.println("Adding point: " + n);
@@ -86,12 +92,12 @@ public class MriView extends JPanel {
             } else {
                 rejected.add(n);
             }
-//            reference =
-//                    filled.stream().mapToDouble(p -> volume.data.get(x, ny - 1 - p.getY(), p.getX(), 0)).sum() / filled.size();
+            repaint();
         }
+
     }
 
-    private void addIfMissing(Point3D point, LinkedList<Point3D> toFill, LinkedList<Point3D> filled, LinkedList<Point3D> rejected) {
+    private void addIfMissing(Point3D point, LinkedList<Point3D> toFill, ConcurrentLinkedQueue<Point3D> filled, LinkedList<Point3D> rejected) {
         if (!filled.contains(point) && !rejected.contains(point)) {
             toFill.push(point);
         }
