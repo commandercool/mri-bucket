@@ -6,12 +6,9 @@ import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.swing.JPanel;
 
@@ -29,10 +26,12 @@ public class MriView extends JPanel {
     private int mouseY = 0;
 
     private ConcurrentLinkedQueue<Point3D> filled = new ConcurrentLinkedQueue<>();
+    private byte[][][] filledArray;
 
     public MriView(String filename) {
         try {
             volume = NiftiVolume.read(filename);
+            filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,11 +77,13 @@ public class MriView extends JPanel {
 
         toFill.add(new Point3D(mouseX / SCALE, mouseY / SCALE, x));
 
+        filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];
+
         while (!toFill.isEmpty()) {
             final Point3D n = toFill.poll();
             if (Math.abs(reference - valueAt(n)) < 100) {
-                filled.add(n);
-                System.out.println("Adding point: " + n);
+                filledArray[n.getZ()][ny - 1 - n.getY()][n.getX()] = 1;
+//                filled.add(n);
                 addIfMissing(new Point3D(n.getX() + 1, n.getY(), n.getZ()), toFill, filled, rejected);
                 addIfMissing(new Point3D(n.getX() - 1, n.getY(), n.getZ()), toFill, filled, rejected);
                 addIfMissing(new Point3D(n.getX(), n.getY() + 1, n.getZ()), toFill, filled, rejected);
@@ -90,7 +91,7 @@ public class MriView extends JPanel {
                 addIfMissing(new Point3D(n.getX(), n.getY(), n.getZ() + 1), toFill, filled, rejected);
                 addIfMissing(new Point3D(n.getX(), n.getY(), n.getZ() - 1), toFill, filled, rejected);
             } else {
-                rejected.add(n);
+                filledArray[n.getZ()][ny - 1 - n.getY()][n.getX()] = -1;
             }
             repaint();
         }
@@ -98,7 +99,7 @@ public class MriView extends JPanel {
     }
 
     private void addIfMissing(Point3D point, LinkedList<Point3D> toFill, ConcurrentLinkedQueue<Point3D> filled, LinkedList<Point3D> rejected) {
-        if (!filled.contains(point) && !rejected.contains(point)) {
+        if (filledArray[point.getZ()][volume.header.dim[2] - 1 - point.getY()][point.getX()] == 0) {
             toFill.push(point);
         }
     }
@@ -136,22 +137,27 @@ public class MriView extends JPanel {
                     rgb = 255;
                 }
                 g.setColor(new Color(rgb, rgb, rgb));
-                g.fillRect(k * SCALE, j * SCALE, SCALE,SCALE);
+                g.fillRect(k * SCALE, j * SCALE, SCALE, SCALE);
+
+                if (filledArray[x][ny - 1 - j][k] == 1) {
+                    g.setColor(new Color(250, 0, 0));
+                    g.fillRect(k * SCALE, j * SCALE, SCALE, SCALE);
+                }
             }
             System.out.println();
         }
 
-        filled.stream().filter(p -> p.getZ() == x).forEach(p -> {
-            double data = volume.data.get(x, ny - 1 - p.getY(), p.getX(), 0);
-            int rgb = (int) data / 5;
-            if (rgb > 255) {
-                rgb = 255;
-            }
-            g.setColor(new Color(250, rgb, rgb));
-            g.fillRect(p.getX() * SCALE, p.getY() * SCALE, SCALE,SCALE);
-        });
+//        filled.stream().filter(p -> p.getZ() == x).forEach(p -> {
+//            double data = volume.data.get(x, ny - 1 - p.getY(), p.getX(), 0);
+//            int rgb = (int) data / 5;
+//            if (rgb > 255) {
+//                rgb = 255;
+//            }
+//            g.setColor(new Color(250, rgb, rgb));
+//            g.fillRect(p.getX() * SCALE, p.getY() * SCALE, SCALE,SCALE);
+//        });
 
-        System.out.println("Selected pixel: " + volume.data.get(x, ny - 1 - mouseY / SCALE, mouseX / SCALE, 0));
+//        System.out.println("Selected pixel: " + volume.data.get(x, ny - 1 - mouseY / SCALE, mouseX / SCALE, 0));
 
         g.setColor(new Color(255, 0, 0));
         g.fillRect(mouseX, mouseY, 4,4);
