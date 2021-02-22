@@ -1,8 +1,10 @@
 package com.commandercool;
 
 import javax.swing.JFrame;
+import javax.swing.JSlider;
 
 import com.commandercool.components.MriView;
+import com.commandercool.context.BucketContext;
 
 public class Application {
 
@@ -17,6 +19,14 @@ public class Application {
 
         frame.pack();
         frame.setVisible(true);
+
+        //Tools panel
+        final JFrame tools = new JFrame("Tools");
+
+        final JSlider slider = new JSlider(0, (int) BucketContext.getCurrent().getMaxIntensity());
+        tools.add(slider);
+
+        tools.setVisible(true);
     }
 
     public static void main(String[] args) {

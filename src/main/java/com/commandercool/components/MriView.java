@@ -19,9 +19,10 @@ import com.ericbarnhill.niftijio.NiftiVolume;
 public class MriView extends JPanel {
 
     private static int SCALE = 3;
+    private static int SHIFT = 0;
 
     private NiftiVolume volume;
-    private int x = 0;
+    private int scroll = 0;
 
     private int mouseX = 0;
     private int mouseY = 0;
@@ -37,7 +38,7 @@ public class MriView extends JPanel {
             e.printStackTrace();
         }
         addMouseWheelListener(e -> {
-            x+=e.getUnitsToScroll();
+            scroll +=e.getUnitsToScroll();
             repaint();
         });
 
@@ -50,7 +51,6 @@ public class MriView extends JPanel {
 
             @Override
             public void keyPressed(KeyEvent e) {
-//                System.out.println("Key pressed! " + e.getKeyChar());
                 if (e.getKeyChar() == '+') {
                     SCALE++;
                     repaint();
@@ -76,6 +76,7 @@ public class MriView extends JPanel {
                 new Thread(() -> {
                     floodFill();
                 }).start();
+//                repaint();
             }
 
             public void mousePressed(MouseEvent e) {
@@ -99,22 +100,24 @@ public class MriView extends JPanel {
     public void floodFill() {
 
         final short ny = volume.header.dim[2];
-        double reference = volume.data.get(x, ny - 1 - mouseY / SCALE, mouseX / SCALE, 0);
+        double oldReference = volume.data.get(scroll, ny - 1 - mouseY / SCALE, mouseX / SCALE, 0);
 
         filled = new ConcurrentLinkedQueue<>();
         LinkedList<Point3D> toFill = new LinkedList<>();
 
-        toFill.add(new Point3D(mouseX / SCALE, mouseY / SCALE, x));
+        final Point3D referencePoint = new Point3D(mouseX / SCALE, mouseY / SCALE, scroll);
+        toFill.add(referencePoint);
+        double reference = valueAt(referencePoint.getY(), referencePoint.getZ(), referencePoint.getX());
 
         filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];
 
         while (!toFill.isEmpty()) {
             final Point3D n = toFill.poll();
-            final double intensity = valueAt(n);
+            final double intensity = valueAt(n.getY(), n.getZ(), n.getX());
 
             final double relative = intensity / reference;
-            if (relative > 0.95 && relative < 1.05) {
-                filledArray[n.getZ()][ny - 1 - n.getY()][n.getX()] = 1;
+            if (Math.abs(intensity - reference) < 10) {
+                filledArray[n.getY()][n.getZ()][n.getX()] = 1;
                 addIfMissing(new Point3D(n.getX() + 1, n.getY(), n.getZ()), toFill);
                 addIfMissing(new Point3D(n.getX() - 1, n.getY(), n.getZ()), toFill);
                 addIfMissing(new Point3D(n.getX(), n.getY() + 1, n.getZ()), toFill);
@@ -122,7 +125,7 @@ public class MriView extends JPanel {
                 addIfMissing(new Point3D(n.getX(), n.getY(), n.getZ() + 1), toFill);
                 addIfMissing(new Point3D(n.getX(), n.getY(), n.getZ() - 1), toFill);
             } else {
-                filledArray[n.getZ()][ny - 1 - n.getY()][n.getX()] = -1;
+                filledArray[n.getY()][n.getZ()][n.getX()] = -1;
             }
             repaint();
         }
@@ -130,14 +133,23 @@ public class MriView extends JPanel {
     }
 
     private void addIfMissing(Point3D point, LinkedList<Point3D> toFill) {
-        if (filledArray[point.getZ()][volume.header.dim[2] - 1 - point.getY()][point.getX()] == 0) {
-            toFill.push(point);
+        if (point.getY() < volume.header.dim[1] && point.getZ() < volume.header.dim[2]
+                && point.getX() < volume.header.dim[3] && point.getZ() >= 0 && point.getX() >= 0 && point.getY() >= 0) {
+            if (filledArray[point.getY()][point.getZ()][point.getX()] == 0) {
+                toFill.push(point);
+            }
         }
     }
 
-    private double valueAt(Point3D point) {
-        final short ny = volume.header.dim[2];
-        return volume.data.get(point.getZ(), ny - 1 - point.getY(), point.getX(), 0);
+    private double valueAt(int x, int y, int z) {
+        double value = volume.data.get(x, y, z, 0);
+        if (value < 145 + SHIFT) {
+            return 0;
+        } else if (value > 701 + SHIFT) {
+            return 255;
+        } else {
+            return (int) (value - (145 + SHIFT))/ 2.18;
+        }
     }
 
     public Dimension getMriDimensions() {
@@ -154,35 +166,69 @@ public class MriView extends JPanel {
         int nz = volume.header.dim[3];
         int dim = volume.header.dim[4];
 
-        if (x >= nx) {
-            x = nx - 1;
-        } else if (x <= 0) {
-            x = 0;
+        if (scroll >= ny) {
+            scroll = ny - 1;
+        } else if (scroll <= 0) {
+            scroll = 0;
         }
 
-        for (int j = 0; j < ny; j++) {
-            for (int k = 0; k < nz; k++) {
-                final double data = volume.data.get(x, ny - 1 - j, k, 0);
+        for (int z = 0; z < nz; z++) {
+            for (int x = 0; x < nx; x++) {
+                final double data = volume.data.get(x, scroll, z, 0);
+                final int intensity = (int) valueAt(x, scroll, z);
+                g.setColor(new Color(intensity, intensity, intensity));
+                g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
 
-                int color = (int) data;
-
-                int blue = color & 0xff;
-                int green = color << 8 & 0xff;
-                int red = color << 2 * 8 & 0xff;
-
-                g.setColor(new Color(red, green, blue));
-                g.fillRect(k * SCALE, j * SCALE, SCALE, SCALE);
-
-                if (filledArray[x][ny - 1 - j][k] == 1) {
+                if (filledArray[x][scroll][z] == 1) {
                     g.setColor(new Color(250, 0, 0));
-                    g.fillRect(k * SCALE, j * SCALE, SCALE, SCALE);
+                    g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
                 }
+
             }
-            System.out.println();
         }
 
-        g.setColor(new Color(255, 0, 0));
-        g.fillRect(mouseX, mouseY, 4,4);
+//        for (int j = 0; j < ny; j++) {
+//            for (int k = 0; k < nz; k++) {
+//                final double data = volume.data.get(x, ny - 1 - j, k, 0);
+//
+//                g.setColor(getWindowedColor(data));
+//                g.fillRect(k * SCALE, j * SCALE, SCALE, SCALE);
+//
+//                if (filledArray[x][ny - 1 - j][k] == 1) {
+//                    g.setColor(new Color(250, 0, 0));
+//                    g.fillRect(k * SCALE, j * SCALE, SCALE, SCALE);
+//                }
+//            }
+//        }
+//
+//        System.out.println("Intencity: " + volume.data.get(x, ny - 1 - mouseY / SCALE, mouseX / SCALE, 0));
+//
+//        g.setColor(new Color(255, 0, 0));
+//        g.fillRect(mouseX, mouseY, 4,4);
+    }
+
+    private Color getRealColor(double data) {
+        int color = (int) data;
+
+        int blue = color & 0xff;
+        int green = color << 8 & 0xff;
+        int red = color << 2 * 8 & 0xff;
+
+        return new Color(red, green, blue);
+    }
+
+    private Color getWindowedColor(double data) {
+        int rgb;
+        if (data < 145 + SHIFT) {
+            rgb = 0;
+        } else if (data > 701 + SHIFT) {
+            rgb =  255;
+        } else {
+            rgb = (int)((data - (145 + SHIFT))/ 2.18);
+        }
+
+        return new Color(rgb, rgb, rgb);
+
     }
 
 }
