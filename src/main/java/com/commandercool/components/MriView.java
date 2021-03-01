@@ -163,12 +163,14 @@ public class MriView extends JPanel {
 
             if (Math.abs(intensity - reference) < threshold) {
                 filledArray[n.getY()][n.getZ()][n.getX()] = 1;
-                addIfMissing(new Point3D(n.getX() + 1, n.getY(), n.getZ()), toFill);
-                addIfMissing(new Point3D(n.getX() - 1, n.getY(), n.getZ()), toFill);
-                addIfMissing(new Point3D(n.getX(), n.getY() + 1, n.getZ()), toFill);
-                addIfMissing(new Point3D(n.getX(), n.getY() - 1, n.getZ()), toFill);
-                addIfMissing(new Point3D(n.getX(), n.getY(), n.getZ() + 1), toFill);
-                addIfMissing(new Point3D(n.getX(), n.getY(), n.getZ() - 1), toFill);
+                for (int i = -1; i < 2; i++) {
+                    for (int j = -1; j < 2; j++) {
+                        if (i != 0 || j != 0) {
+                            addIfMissing(new Point3D(n.getX() + i, n.getY() + j, n.getZ()), toFill);
+                            addIfMissing(new Point3D(n.getX(), n.getY() + i, n.getZ() + j), toFill);
+                        }
+                    }
+                }
             } else {
                 filledArray[n.getY()][n.getZ()][n.getX()] = -1;
             }
