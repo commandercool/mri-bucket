@@ -20,7 +20,6 @@ import com.ericbarnhill.niftijio.NiftiVolume;
 public class MriView extends JPanel {
 
     private static int SCALE = 3;
-    private static int SHIFT = 0;
 
     private NiftiVolume volume;
     private int scroll = 0;
@@ -94,20 +93,49 @@ public class MriView extends JPanel {
         });
     }
 
+    public void resetSelection() {
+        filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];;
+    }
+
+    public void substractSelection() {
+        for (int i = 0; i < volume.header.dim[1]; i++) {
+            for (int j = 0; j < volume.header.dim[2]; j++) {
+                for (int k = 0; k < volume.header.dim[3]; k++) {
+                    if (filledArray[i][j][k] == 1) {
+                        volume.data.set(i, j, k, 0, 0);
+                    }
+                }
+            }
+        }
+        resetSelection();
+    }
+
+    public void invertSelection() {
+        for (int i = 0; i < volume.header.dim[1]; i++) {
+            for (int j = 0; j < volume.header.dim[2]; j++) {
+                for (int k = 0; k < volume.header.dim[3]; k++) {
+                    if (filledArray[i][j][k] == 1) {
+                        filledArray[i][j][k] = 0;
+                    } else {
+                        filledArray[i][j][k] = 1;
+                    }
+                }
+            }
+        }
+    }
+
     public void setNifti(String path) {
         try {
             volume = NiftiVolume.read(path);
             filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];
         } catch (IOException e) {
-            e.printStackTrace();
+            // ignored
         }
     }
 
     public void floodFill() {
 
         final short ny = volume.header.dim[2];
-        double oldReference = volume.data.get(scroll, ny - 1 - mouseY / SCALE, mouseX / SCALE, 0);
-
         filled = new ConcurrentLinkedQueue<>();
         LinkedList<Point3D> toFill = new LinkedList<>();
 
@@ -121,8 +149,9 @@ public class MriView extends JPanel {
             final Point3D n = toFill.poll();
             final double intensity = valueAt(n.getY(), n.getZ(), n.getX());
 
-            final double relative = intensity / reference;
-            if (Math.abs(intensity - reference) < 10) {
+            final int threshold = BucketContext.getCurrent().getThreshold();
+
+            if (Math.abs(intensity - reference) < threshold) {
                 filledArray[n.getY()][n.getZ()][n.getX()] = 1;
                 addIfMissing(new Point3D(n.getX() + 1, n.getY(), n.getZ()), toFill);
                 addIfMissing(new Point3D(n.getX() - 1, n.getY(), n.getZ()), toFill);
@@ -230,30 +259,6 @@ public class MriView extends JPanel {
                 }
             }
         }
-    }
-
-    private Color getRealColor(double data) {
-        int color = (int) data;
-
-        int blue = color & 0xff;
-        int green = color << 8 & 0xff;
-        int red = color << 2 * 8 & 0xff;
-
-        return new Color(red, green, blue);
-    }
-
-    private Color getWindowedColor(double data) {
-        int rgb;
-        if (data < 145 + SHIFT) {
-            rgb = 0;
-        } else if (data > 701 + SHIFT) {
-            rgb =  255;
-        } else {
-            rgb = (int)((data - (145 + SHIFT))/ 2.18);
-        }
-
-        return new Color(rgb, rgb, rgb);
-
     }
 
 }

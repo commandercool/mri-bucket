@@ -11,6 +11,7 @@ public class BucketContext {
 
     private double maxIntensity = 100;
     private double minIntensity = 0;
+    private int threshold = 10;
 
     public synchronized static BucketContext getCurrent() {
         return current;

@@ -6,6 +6,7 @@ import java.awt.Label;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -55,6 +56,14 @@ public class Application {
         tools.add(new Label("Max intensity:"));
         tools.add(maxSlider);
 
+        final JSlider threshold = new JSlider(0, 255);
+        threshold.setValue(100);
+        threshold.addChangeListener(e -> {
+            BucketContext.getCurrent().setThreshold(threshold.getValue());
+        });
+        tools.add(new JLabel("Threshold (0 to 255):"));
+        tools.add(threshold);
+
         tools.setMinimumSize(new Dimension(256, 256));
 
         //Menu bar
@@ -92,9 +101,33 @@ public class Application {
         });
         view.add(toolsMenuItem);
 
+        final JMenu selection = new JMenu("Selection");
+        final JMenuItem reset = new JMenuItem("Reset");
+        reset.addActionListener(e -> {
+            mriView.resetSelection();
+            mriView.repaint();
+        });
+
+        final JMenuItem subtract = new JMenuItem("Subtract");
+        subtract.addActionListener(e -> {
+            mriView.substractSelection();
+            mriView.repaint();
+        });
+
+        final JMenuItem invert = new JMenuItem("Invert");
+        invert.addActionListener(e -> {
+            mriView.invertSelection();
+            mriView.repaint();
+        });
+
+
+        selection.add(reset);
+        selection.add(subtract);
+        selection.add(invert);
 
         jMenuBar.add(file);
         jMenuBar.add(view);
+        jMenuBar.add(selection);
 
         frame.setJMenuBar(jMenuBar);
 
