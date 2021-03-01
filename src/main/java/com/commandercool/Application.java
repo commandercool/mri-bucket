@@ -110,7 +110,7 @@ public class Application {
 
         final JMenuItem subtract = new JMenuItem("Subtract");
         subtract.addActionListener(e -> {
-            mriView.substractSelection();
+            mriView.subtractSelection();
             mriView.repaint();
         });
 

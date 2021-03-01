@@ -100,7 +100,7 @@ public class MriView extends JPanel {
         filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];;
     }
 
-    public void substractSelection() {
+    public void subtractSelection() {
         for (int i = 0; i < volume.header.dim[1]; i++) {
             for (int j = 0; j < volume.header.dim[2]; j++) {
                 for (int k = 0; k < volume.header.dim[3]; k++) {
