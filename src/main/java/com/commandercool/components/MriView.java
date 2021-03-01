@@ -31,12 +31,9 @@ public class MriView extends JPanel {
     private byte[][][] filledArray;
 
     public MriView(String filename) {
-        try {
-            volume = NiftiVolume.read(filename);
-            filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        setNifti(filename);
+
         addMouseWheelListener(e -> {
             scroll +=e.getUnitsToScroll();
             repaint();
@@ -76,7 +73,6 @@ public class MriView extends JPanel {
                 new Thread(() -> {
                     floodFill();
                 }).start();
-//                repaint();
             }
 
             public void mousePressed(MouseEvent e) {
@@ -95,6 +91,15 @@ public class MriView extends JPanel {
 
             }
         });
+    }
+
+    public void setNifti(String path) {
+        try {
+            volume = NiftiVolume.read(path);
+            filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void floodFill() {
@@ -153,58 +158,43 @@ public class MriView extends JPanel {
     }
 
     public Dimension getMriDimensions() {
-        return new Dimension(volume.header.dim[3] * SCALE + 15, volume.header.dim[2] * SCALE + 36);
+        if (volume != null) {
+            return new Dimension(volume.header.dim[3] * SCALE + 15, volume.header.dim[2] * SCALE + 36);
+        } else {
+            return new Dimension(480, 480);
+        }
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        if (volume != null) {
+            int nx = volume.header.dim[1];
+            int ny = volume.header.dim[2];
+            int nz = volume.header.dim[3];
+            int dim = volume.header.dim[4];
 
+            if (scroll >= ny) {
+                scroll = ny - 1;
+            } else if (scroll <= 0) {
+                scroll = 0;
+            }
 
-        int nx = volume.header.dim[1];
-        int ny = volume.header.dim[2];
-        int nz = volume.header.dim[3];
-        int dim = volume.header.dim[4];
-
-        if (scroll >= ny) {
-            scroll = ny - 1;
-        } else if (scroll <= 0) {
-            scroll = 0;
-        }
-
-        for (int z = 0; z < nz; z++) {
-            for (int x = 0; x < nx; x++) {
-                final double data = volume.data.get(x, scroll, z, 0);
-                final int intensity = (int) valueAt(x, scroll, z);
-                g.setColor(new Color(intensity, intensity, intensity));
-                g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
-
-                if (filledArray[x][scroll][z] == 1) {
-                    g.setColor(new Color(250, 0, 0));
+            for (int z = 0; z < nz; z++) {
+                for (int x = 0; x < nx; x++) {
+                    final double data = volume.data.get(x, scroll, z, 0);
+                    final int intensity = (int) valueAt(x, scroll, z);
+                    g.setColor(new Color(intensity, intensity, intensity));
                     g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
-                }
 
+                    if (filledArray[x][scroll][z] == 1) {
+                        g.setColor(new Color(250, 0, 0));
+                        g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
+                    }
+
+                }
             }
         }
-
-//        for (int j = 0; j < ny; j++) {
-//            for (int k = 0; k < nz; k++) {
-//                final double data = volume.data.get(x, ny - 1 - j, k, 0);
-//
-//                g.setColor(getWindowedColor(data));
-//                g.fillRect(k * SCALE, j * SCALE, SCALE, SCALE);
-//
-//                if (filledArray[x][ny - 1 - j][k] == 1) {
-//                    g.setColor(new Color(250, 0, 0));
-//                    g.fillRect(k * SCALE, j * SCALE, SCALE, SCALE);
-//                }
-//            }
-//        }
-//
-//        System.out.println("Intencity: " + volume.data.get(x, ny - 1 - mouseY / SCALE, mouseX / SCALE, 0));
-//
-//        g.setColor(new Color(255, 0, 0));
-//        g.fillRect(mouseX, mouseY, 4,4);
     }
 
     private Color getRealColor(double data) {
