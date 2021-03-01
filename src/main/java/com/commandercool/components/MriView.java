@@ -17,6 +17,9 @@ import com.commandercool.context.BucketContext;
 import com.commandercool.geometry.Point3D;
 import com.ericbarnhill.niftijio.NiftiVolume;
 
+import lombok.Getter;
+
+@Getter
 public class MriView extends JPanel {
 
     private static int SCALE = 3;
@@ -240,8 +243,8 @@ public class MriView extends JPanel {
 
             if (scroll >= ny) {
                 scroll = ny - 1;
-            } else if (scroll <= 0) {
-                scroll = 0;
+            } else if (scroll <= BucketContext.getCurrent().getMinDimension()) {
+                scroll = BucketContext.getCurrent().getMinDimension();
             }
 
             for (int z = 0; z < nz; z++) {

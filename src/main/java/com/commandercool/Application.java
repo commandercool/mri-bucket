@@ -125,9 +125,17 @@ public class Application {
         selection.add(subtract);
         selection.add(invert);
 
+        final JMenu layer = new JMenu("Layer");
+        final JMenuItem curLower = new JMenuItem("Cut lower");
+        curLower.addActionListener(e -> {
+            BucketContext.getCurrent().setMinDimension(mriView.getScroll());
+        });
+        layer.add(curLower);
+
         jMenuBar.add(file);
         jMenuBar.add(view);
         jMenuBar.add(selection);
+        jMenuBar.add(layer);
 
         frame.setJMenuBar(jMenuBar);
 
