@@ -7,7 +7,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -24,18 +23,13 @@ public class MriView extends JPanel {
 
     private static int SCALE = 3;
 
-    private NiftiVolume volume;
     private int scroll = 0;
-
     private int mouseX = 0;
     private int mouseY = 0;
 
     private ConcurrentLinkedQueue<Point3D> filled = new ConcurrentLinkedQueue<>();
-    private byte[][][] filledArray;
 
     public MriView(String filename) {
-
-        setNifti(filename);
 
         addMouseWheelListener(e -> {
             scroll +=e.getUnitsToScroll();
@@ -97,10 +91,23 @@ public class MriView extends JPanel {
     }
 
     public void resetSelection() {
-        filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];;
+        BucketContext.getCurrent().saveState();
+        final NiftiVolume volume = getVolume();
+        BucketContext.getCurrent().setFilledArray(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
+    }
+
+    private NiftiVolume getVolume() {
+        return BucketContext.getCurrent().getVolume();
+    }
+
+    private byte[][][] getFilledArray() {
+        return BucketContext.getCurrent().getFilledArray();
     }
 
     public void subtractSelection() {
+        BucketContext.getCurrent().saveState();
+        final NiftiVolume volume = getVolume();
+        final byte[][][] filledArray = getFilledArray();
         for (int i = 0; i < volume.header.dim[1]; i++) {
             for (int j = 0; j < volume.header.dim[2]; j++) {
                 for (int k = 0; k < volume.header.dim[3]; k++) {
@@ -114,6 +121,9 @@ public class MriView extends JPanel {
     }
 
     public void invertSelection() {
+        BucketContext.getCurrent().saveState();
+        final NiftiVolume volume = getVolume();
+        final byte[][][] filledArray = getFilledArray();
         for (int i = 0; i < volume.header.dim[1]; i++) {
             for (int j = 0; j < volume.header.dim[2]; j++) {
                 for (int k = 0; k < volume.header.dim[3]; k++) {
@@ -127,16 +137,9 @@ public class MriView extends JPanel {
         }
     }
 
-    public void setNifti(String path) {
-        try {
-            volume = NiftiVolume.read(path);
-            filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];
-        } catch (IOException e) {
-            // ignored
-        }
-    }
-
     public void floodFill() {
+
+        final NiftiVolume volume = getVolume();
 
         final short ny = volume.header.dim[2];
         filled = new ConcurrentLinkedQueue<>();
@@ -146,7 +149,8 @@ public class MriView extends JPanel {
         toFill.add(referencePoint);
         double reference = valueAt(referencePoint.getY(), referencePoint.getZ(), referencePoint.getX());
 
-        filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];
+        BucketContext.getCurrent().setFilledArray(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
+        final byte[][][] filledArray = getFilledArray();
 
         while (!toFill.isEmpty()) {
             final Point3D n = toFill.poll();
@@ -171,6 +175,7 @@ public class MriView extends JPanel {
     }
 
     public double getMaxIntensity() {
+        final NiftiVolume volume = getVolume();
         double max = 0.0;
         for (int i = 0; i < volume.header.dim[1]; i++) {
             for (int j = 0; j < volume.header.dim[2]; j++) {
@@ -185,7 +190,9 @@ public class MriView extends JPanel {
         return max;
     }
 
+    // TODO: move to NiftiVolume
     public double getMinIntensity() {
+        final NiftiVolume volume = getVolume();
         double min = Double.MAX_VALUE;
         for (int i = 0; i < volume.header.dim[1]; i++) {
             for (int j = 0; j < volume.header.dim[2]; j++) {
@@ -201,6 +208,8 @@ public class MriView extends JPanel {
     }
 
     private void addIfMissing(Point3D point, LinkedList<Point3D> toFill) {
+        final NiftiVolume volume = getVolume();
+        final byte[][][] filledArray = getFilledArray();
         if (point.getY() < volume.header.dim[1] && point.getZ() < volume.header.dim[2]
                 && point.getX() < volume.header.dim[3] && point.getZ() >= 0 && point.getX() >= 0 && point.getY() >= 0) {
             if (filledArray[point.getY()][point.getZ()][point.getX()] == 0) {
@@ -209,7 +218,9 @@ public class MriView extends JPanel {
         }
     }
 
+    // TODO: add to nifti
     private double valueAt(int x, int y, int z) {
+        final NiftiVolume volume = getVolume();
         double value = volume.data.get(x, y, z, 0);
         final BucketContext context = BucketContext.getCurrent();
 
@@ -225,6 +236,7 @@ public class MriView extends JPanel {
     }
 
     public Dimension getMriDimensions() {
+        final NiftiVolume volume = getVolume();
         if (volume != null) {
             return new Dimension(volume.header.dim[3] * SCALE + 15, volume.header.dim[2] * SCALE + 36);
         } else {
@@ -235,11 +247,12 @@ public class MriView extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        final NiftiVolume volume = getVolume();
+        final byte[][][] filledArray = getFilledArray();
         if (volume != null) {
             int nx = volume.header.dim[1];
             int ny = volume.header.dim[2];
             int nz = volume.header.dim[3];
-            int dim = volume.header.dim[4];
 
             if (scroll >= ny) {
                 scroll = ny - 1;

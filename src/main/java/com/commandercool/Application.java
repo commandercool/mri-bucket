@@ -3,6 +3,7 @@ package com.commandercool;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Label;
+import java.io.IOException;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -15,6 +16,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.commandercool.components.MriView;
 import com.commandercool.context.BucketContext;
+import com.ericbarnhill.niftijio.NiftiVolume;
 
 public class Application {
 
@@ -73,7 +75,11 @@ public class Application {
         open.addActionListener(e -> {
             int returnVal = jFileChooser.showOpenDialog(frame);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                mriView.setNifti(jFileChooser.getSelectedFile().getPath());
+                try {
+                    BucketContext.getCurrent().setVolume(NiftiVolume.read(jFileChooser.getSelectedFile().getPath()));
+                } catch (IOException ioException) {
+                    // ignore
+                }
                 mriView.repaint();
                 final Dimension mriDimensions = mriView.getMriDimensions();
                 frame.setMinimumSize(mriDimensions);
