@@ -1,5 +1,7 @@
 package com.commandercool;
 
+import static com.commandercool.context.BucketContext.getCurrentContext;
+
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Label;
@@ -15,7 +17,6 @@ import javax.swing.JSlider;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.commandercool.components.MriView;
-import com.commandercool.context.BucketContext;
 import com.ericbarnhill.niftijio.NiftiVolume;
 
 public class Application {
@@ -41,13 +42,13 @@ public class Application {
 
         final JSlider minSlider = new JSlider(0, 100);
         minSlider.addChangeListener(e -> {
-            BucketContext.getCurrent().setMinIntensity(minSlider.getValue());
+            getCurrentContext().setMinIntensity(minSlider.getValue());
             mriView.repaint();
         });
 
         final JSlider maxSlider = new JSlider(0, 100);
         maxSlider.addChangeListener(e -> {
-            BucketContext.getCurrent().setMaxIntensity(maxSlider.getValue());
+            getCurrentContext().setMaxIntensity(maxSlider.getValue());
             mriView.repaint();
         });
 
@@ -61,7 +62,7 @@ public class Application {
         final JSlider threshold = new JSlider(1, 255);
         threshold.setValue(100);
         threshold.addChangeListener(e -> {
-            BucketContext.getCurrent().setThreshold(threshold.getValue());
+            getCurrentContext().setThreshold(threshold.getValue());
         });
         tools.add(new JLabel("Threshold (1 to 255):"));
         tools.add(threshold);
@@ -76,7 +77,7 @@ public class Application {
             int returnVal = jFileChooser.showOpenDialog(frame);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
-                    BucketContext.getCurrent().setVolume(NiftiVolume.read(jFileChooser.getSelectedFile().getPath()));
+                    getCurrentContext().setVolume(NiftiVolume.read(jFileChooser.getSelectedFile().getPath()));
                 } catch (IOException ioException) {
                     // ignore
                 }
@@ -107,7 +108,16 @@ public class Application {
         });
         view.add(toolsMenuItem);
 
-        final JMenu selection = new JMenu("Selection");
+        final JMenu edit = new JMenu("Edit");
+
+        final JMenuItem undo = new JMenuItem("Undo");
+        undo.addActionListener(e -> {
+            getCurrentContext().undo();
+            mriView.repaint();
+        });
+        edit.add(undo);
+        edit.addSeparator();
+
         final JMenuItem reset = new JMenuItem("Reset");
         reset.addActionListener(e -> {
             mriView.resetSelection();
@@ -127,20 +137,20 @@ public class Application {
         });
 
 
-        selection.add(reset);
-        selection.add(subtract);
-        selection.add(invert);
+        edit.add(reset);
+        edit.add(subtract);
+        edit.add(invert);
 
         final JMenu layer = new JMenu("Layer");
         final JMenuItem curLower = new JMenuItem("Cut lower");
         curLower.addActionListener(e -> {
-            BucketContext.getCurrent().setMinDimension(mriView.getScroll());
+            getCurrentContext().setMinDimension(mriView.getScroll());
         });
         layer.add(curLower);
 
         jMenuBar.add(file);
         jMenuBar.add(view);
-        jMenuBar.add(selection);
+        jMenuBar.add(edit);
         jMenuBar.add(layer);
 
         frame.setJMenuBar(jMenuBar);

@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class State {
 
-    private final NiftiVolume volume;
+    private final Object volumeData;
     private final byte[][][] filledArray;
 
 }

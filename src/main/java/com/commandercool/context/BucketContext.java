@@ -1,6 +1,11 @@
 package com.commandercool.context;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
+
 import com.commandercool.utils.LimitedQueue;
+import com.ericbarnhill.niftijio.FourDimensionalArray;
+import com.ericbarnhill.niftijio.NiftiHeader;
 import com.ericbarnhill.niftijio.NiftiVolume;
 
 import lombok.Getter;
@@ -22,7 +27,7 @@ public class BucketContext {
 
     private LimitedQueue<State> states = new LimitedQueue<>(10);
 
-    public synchronized static BucketContext getCurrent() {
+    public synchronized static BucketContext getCurrentContext() {
         return current;
     }
 
@@ -32,13 +37,30 @@ public class BucketContext {
     }
 
     public void saveState() {
-        states.push(new State(volume, filledArray));
+        try {
+            final FourDimensionalArray data = volume.data;
+            final Field dataField = data.getClass().getDeclaredField("data");
+            dataField.setAccessible(true);
+            dataField.get(data);
+            states.push(new State(((double[])dataField.get(data)).clone(), filledArray.clone()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void undo() {
-        final State state = states.pop();
-        this.volume = state.getVolume();
-        this.filledArray = state.getFilledArray();
+        if (!states.isEmpty()) {
+            try {
+                final State state = states.pop();
+                final FourDimensionalArray data = this.volume.data;
+                final Field dataField = data.getClass().getDeclaredField("data");
+                dataField.setAccessible(true);
+                dataField.set(data, state.getVolumeData());
+                this.filledArray = state.getFilledArray();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
