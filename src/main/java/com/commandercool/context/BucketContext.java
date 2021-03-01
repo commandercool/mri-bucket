@@ -1,11 +1,9 @@
 package com.commandercool.context;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 
 import com.commandercool.utils.LimitedQueue;
 import com.ericbarnhill.niftijio.FourDimensionalArray;
-import com.ericbarnhill.niftijio.NiftiHeader;
 import com.ericbarnhill.niftijio.NiftiVolume;
 
 import lombok.Getter;

@@ -1,7 +1,5 @@
 package com.commandercool.context;
 
-import com.ericbarnhill.niftijio.NiftiVolume;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

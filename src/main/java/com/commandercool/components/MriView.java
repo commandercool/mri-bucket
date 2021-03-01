@@ -31,7 +31,7 @@ public class MriView extends JPanel {
 
     private ConcurrentLinkedQueue<Point3D> filled = new ConcurrentLinkedQueue<>();
 
-    public MriView(String filename) {
+    public MriView() {
 
         addMouseWheelListener(e -> {
             scroll +=e.getUnitsToScroll();

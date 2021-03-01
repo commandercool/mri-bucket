@@ -26,7 +26,7 @@ public class Application {
         JFrame frame = new JFrame("MRI Flood Fill");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        final MriView mriView = new MriView("");
+        final MriView mriView = new MriView();
         frame.setMinimumSize(mriView.getMriDimensions());
         frame.add(mriView);
 
@@ -160,11 +160,7 @@ public class Application {
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createAndShowGUI();
-            }
-        });
+        javax.swing.SwingUtilities.invokeLater(Application::createAndShowGUI);
     }
 
 }
