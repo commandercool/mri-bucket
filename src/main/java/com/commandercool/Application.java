@@ -1,6 +1,8 @@
 package com.commandercool;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Label;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -31,6 +33,30 @@ public class Application {
         final JFileChooser jFileChooser = new JFileChooser();
         jFileChooser.setFileFilter(new FileNameExtensionFilter("MRI Files", "nii"));
 
+        //Tools panel
+        final JFrame tools = new JFrame("Tools");
+
+        final JSlider minSlider = new JSlider(0, 100);
+        minSlider.addChangeListener(e -> {
+            BucketContext.getCurrent().setMinIntensity(minSlider.getValue());
+            mriView.repaint();
+        });
+
+        final JSlider maxSlider = new JSlider(0, 100);
+        maxSlider.addChangeListener(e -> {
+            BucketContext.getCurrent().setMaxIntensity(maxSlider.getValue());
+            mriView.repaint();
+        });
+
+        tools.setLayout(new FlowLayout());
+
+        tools.add(new Label("Min intensity:"));
+        tools.add(minSlider);
+        tools.add(new Label("Max intensity:"));
+        tools.add(maxSlider);
+
+        tools.setMinimumSize(new Dimension(256, 256));
+
         //Menu bar
         final JMenuBar jMenuBar = new JMenuBar();
         final JMenu file = new JMenu("File");
@@ -43,21 +69,35 @@ public class Application {
                 final Dimension mriDimensions = mriView.getMriDimensions();
                 frame.setMinimumSize(mriDimensions);
                 frame.setSize(mriDimensions);
+
+                minSlider.setMaximum((int) mriView.getMaxIntensity());
+                minSlider.setMinimum((int) mriView.getMinIntensity());
+                minSlider.setValue(minSlider.getMinimum());
+                minSlider.repaint();
+
+                maxSlider.setMaximum((int) mriView.getMaxIntensity());
+                maxSlider.setMinimum((int) mriView.getMinIntensity());
+                maxSlider.setValue(maxSlider.getMaximum());
+                maxSlider.repaint();
+
+                System.out.println("Max intensity: " + mriView.getMaxIntensity() + "; min intensity: " + mriView.getMinIntensity());
             }
         });
-
         file.add(open);
+
+        final JMenu view = new JMenu("View");
+        final JMenuItem toolsMenuItem = new JMenuItem("Tools");
+        toolsMenuItem.addActionListener(e -> {
+            tools.setVisible(!tools.isVisible());
+        });
+        view.add(toolsMenuItem);
+
+
         jMenuBar.add(file);
+        jMenuBar.add(view);
 
         frame.setJMenuBar(jMenuBar);
 
-        //Tools panel
-        final JFrame tools = new JFrame("Tools");
-
-        final JSlider slider = new JSlider(0, (int) BucketContext.getCurrent().getMaxIntensity());
-        tools.add(slider);
-
-        tools.setVisible(true);
     }
 
     public static void main(String[] args) {

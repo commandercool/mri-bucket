@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JPanel;
 
+import com.commandercool.context.BucketContext;
 import com.commandercool.geometry.Point3D;
 import com.ericbarnhill.niftijio.NiftiVolume;
 
@@ -137,6 +138,36 @@ public class MriView extends JPanel {
 
     }
 
+    public double getMaxIntensity() {
+        double max = 0.0;
+        for (int i = 0; i < volume.header.dim[1]; i++) {
+            for (int j = 0; j < volume.header.dim[2]; j++) {
+                for (int k = 0; k < volume.header.dim[3]; k++) {
+                    final double intensity = volume.data.get(i, j, k, 0);
+                    if (intensity > max) {
+                        max = intensity;
+                    }
+                }
+            }
+        }
+        return max;
+    }
+
+    public double getMinIntensity() {
+        double min = Double.MAX_VALUE;
+        for (int i = 0; i < volume.header.dim[1]; i++) {
+            for (int j = 0; j < volume.header.dim[2]; j++) {
+                for (int k = 0; k < volume.header.dim[3]; k++) {
+                    final double intensity = volume.data.get(i, j, k, 0);
+                    if (intensity < min) {
+                        min = intensity;
+                    }
+                }
+            }
+        }
+        return min;
+    }
+
     private void addIfMissing(Point3D point, LinkedList<Point3D> toFill) {
         if (point.getY() < volume.header.dim[1] && point.getZ() < volume.header.dim[2]
                 && point.getX() < volume.header.dim[3] && point.getZ() >= 0 && point.getX() >= 0 && point.getY() >= 0) {
@@ -148,12 +179,16 @@ public class MriView extends JPanel {
 
     private double valueAt(int x, int y, int z) {
         double value = volume.data.get(x, y, z, 0);
-        if (value < 145 + SHIFT) {
+        final BucketContext context = BucketContext.getCurrent();
+
+        final double k = (context.getMaxIntensity() - context.getMinIntensity() + 1) / 255.0;
+
+        if (value < context.getMinIntensity()) {
             return 0;
-        } else if (value > 701 + SHIFT) {
+        } else if (value > context.getMaxIntensity()) {
             return 255;
         } else {
-            return (int) (value - (145 + SHIFT))/ 2.18;
+            return (int) (value - context.getMinIntensity() + 1)/ k;
         }
     }
 
