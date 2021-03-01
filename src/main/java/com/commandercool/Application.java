@@ -56,12 +56,12 @@ public class Application {
         tools.add(new Label("Max intensity:"));
         tools.add(maxSlider);
 
-        final JSlider threshold = new JSlider(0, 255);
+        final JSlider threshold = new JSlider(1, 255);
         threshold.setValue(100);
         threshold.addChangeListener(e -> {
             BucketContext.getCurrent().setThreshold(threshold.getValue());
         });
-        tools.add(new JLabel("Threshold (0 to 255):"));
+        tools.add(new JLabel("Threshold (1 to 255):"));
         tools.add(threshold);
 
         tools.setMinimumSize(new Dimension(256, 256));
