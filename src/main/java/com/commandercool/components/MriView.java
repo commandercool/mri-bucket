@@ -3,6 +3,7 @@ package com.commandercool.components;
 import static com.commandercool.context.BucketContext.getCurrentContext;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
@@ -32,6 +33,8 @@ public class MriView extends JPanel {
     private ConcurrentLinkedQueue<Point3D> filled = new ConcurrentLinkedQueue<>();
 
     public MriView() {
+
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 
         addMouseWheelListener(e -> {
             scroll +=e.getUnitsToScroll();
@@ -141,7 +144,7 @@ public class MriView extends JPanel {
     }
 
     public void floodFill() {
-
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         final NiftiVolume volume = getVolume();
 
         final short ny = volume.header.dim[2];
@@ -176,7 +179,7 @@ public class MriView extends JPanel {
             }
             repaint();
         }
-
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
     }
 
     public double getMaxIntensity() {
