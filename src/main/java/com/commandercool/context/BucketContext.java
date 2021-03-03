@@ -19,6 +19,8 @@ public class BucketContext {
     private double minIntensity = 0;
     private int threshold = 10;
     private int minDimension = 0;
+    private volatile boolean fillRunning = false;
+    private volatile boolean canceled = false;
 
     private NiftiVolume volume;
     private byte[][][] filledArray;

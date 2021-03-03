@@ -144,10 +144,10 @@ public class MriView extends JPanel {
     }
 
     public void floodFill() {
+        getCurrentContext().setFillRunning(true);
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         final NiftiVolume volume = getVolume();
 
-        final short ny = volume.header.dim[2];
         filled = new ConcurrentLinkedQueue<>();
         LinkedList<Point3D> toFill = new LinkedList<>();
 
@@ -158,7 +158,7 @@ public class MriView extends JPanel {
         getCurrentContext().setFilledArray(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
         final byte[][][] filledArray = getFilledArray();
 
-        while (!toFill.isEmpty()) {
+        while (!toFill.isEmpty() && !getCurrentContext().isCanceled()) {
             final Point3D n = toFill.poll();
             final double intensity = valueAt(n.getY(), n.getZ(), n.getX());
 
@@ -179,6 +179,8 @@ public class MriView extends JPanel {
             }
             repaint();
         }
+        getCurrentContext().setCanceled(false);
+        getCurrentContext().setFillRunning(false);
         this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
     }
 

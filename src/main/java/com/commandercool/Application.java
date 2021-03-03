@@ -110,6 +110,15 @@ public class Application {
 
         final JMenu edit = new JMenu("Edit");
 
+        final JMenuItem cancel = new JMenuItem("Cancel fill");
+        cancel.addActionListener(e -> {
+            if (getCurrentContext().isFillRunning()) {
+                getCurrentContext().setCanceled(true);
+            }
+        });
+        edit.add(cancel);
+        edit.addSeparator();
+
         final JMenuItem undo = new JMenuItem("Undo");
         undo.addActionListener(e -> {
             getCurrentContext().undo();
