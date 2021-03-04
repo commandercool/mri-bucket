@@ -2,6 +2,8 @@ package com.commandercool.context;
 
 import java.lang.reflect.Field;
 
+import javax.swing.JProgressBar;
+
 import com.commandercool.utils.LimitedQueue;
 import com.ericbarnhill.niftijio.FourDimensionalArray;
 import com.ericbarnhill.niftijio.NiftiVolume;
@@ -21,6 +23,8 @@ public class BucketContext {
     private int minDimension = 0;
     private volatile boolean fillRunning = false;
     private volatile boolean canceled = false;
+
+    private JProgressBar progressBar;
 
     private NiftiVolume volume;
     private byte[][][] filledArray;

@@ -2,17 +2,21 @@ package com.commandercool;
 
 import static com.commandercool.context.BucketContext.getCurrentContext;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Label;
 import java.io.IOException;
 
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -28,10 +32,20 @@ public class Application {
 
         final MriView mriView = new MriView();
         frame.setMinimumSize(mriView.getMriDimensions());
-        frame.add(mriView);
+        frame.add(mriView, BorderLayout.CENTER);
 
         frame.pack();
         frame.setVisible(true);
+
+        //Bottom panel
+        final JPanel bottom = new JPanel();
+        final JProgressBar progressBar = new JProgressBar();
+        getCurrentContext().setProgressBar(progressBar);
+        final JButton cancelButton = new JButton("Cancel");
+        bottom.add(progressBar);
+        bottom.add(cancelButton);
+
+        frame.add(bottom, BorderLayout.PAGE_END);
 
         //File chooser
         final JFileChooser jFileChooser = new JFileChooser();
