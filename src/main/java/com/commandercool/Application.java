@@ -42,6 +42,11 @@ public class Application {
         final JProgressBar progressBar = new JProgressBar();
         getCurrentContext().setProgressBar(progressBar);
         final JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(e -> {
+            if (getCurrentContext().isFillRunning()) {
+                getCurrentContext().setCanceled(true);
+            }
+        });
         bottom.add(progressBar);
         bottom.add(cancelButton);
 
@@ -123,15 +128,6 @@ public class Application {
         view.add(toolsMenuItem);
 
         final JMenu edit = new JMenu("Edit");
-
-        final JMenuItem cancel = new JMenuItem("Cancel fill");
-        cancel.addActionListener(e -> {
-            if (getCurrentContext().isFillRunning()) {
-                getCurrentContext().setCanceled(true);
-            }
-        });
-        edit.add(cancel);
-        edit.addSeparator();
 
         final JMenuItem undo = new JMenuItem("Undo");
         undo.addActionListener(e -> {

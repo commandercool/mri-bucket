@@ -25,6 +25,7 @@ import lombok.Getter;
 public class MriView extends JPanel {
 
     private static int SCALE = 2;
+    private static int EMPTY_VALUE = 0;
 
     private int scroll = 0;
     private int mouseX = 0;
@@ -116,7 +117,7 @@ public class MriView extends JPanel {
             for (int j = 0; j < volume.header.dim[2]; j++) {
                 for (int k = 0; k < volume.header.dim[3]; k++) {
                     if (filledArray[i][j][k] == 1) {
-                        volume.data.set(i, j, k, 0, 0);
+                        volume.data.set(i, j, k, 0, EMPTY_VALUE);
                     }
                 }
             }
@@ -168,7 +169,7 @@ public class MriView extends JPanel {
 
             final int threshold = getCurrentContext().getThreshold();
 
-            if (Math.abs(intensity - reference) < threshold) {
+            if ((int) intensity != EMPTY_VALUE && Math.abs(intensity - reference) < threshold) {
                 filledArray[n.getY()][n.getZ()][n.getX()] = 1;
                 for (int i = -1; i < 2; i++) {
                     for (int j = -1; j < 2; j++) {
@@ -241,6 +242,9 @@ public class MriView extends JPanel {
     private double valueAt(int x, int y, int z) {
         final NiftiVolume volume = getVolume();
         double value = volume.data.get(x, y, z, 0);
+        if ((int) value == EMPTY_VALUE) {
+            return value;
+        }
         final BucketContext context = getCurrentContext();
 
         final double k = (context.getMaxIntensity() - context.getMinIntensity() + 1) / 255.0;
