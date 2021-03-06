@@ -10,12 +10,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.LinkedList;
 
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
 import com.commandercool.context.BucketContext;
+import com.commandercool.context.Mode;
 import com.commandercool.geometry.Point3D;
 import com.ericbarnhill.niftijio.NiftiVolume;
 
@@ -24,12 +26,21 @@ import lombok.Getter;
 @Getter
 public class MriView extends JPanel {
 
+    private static final int EMPTY_VALUE = 0;
+
     private static int SCALE = 2;
-    private static int EMPTY_VALUE = 0;
 
     private int scroll = 0;
+
     private int mouseX = 0;
     private int mouseY = 0;
+
+    private int mouseXPrev = 0;
+    private int mouseYPrev = 0;
+    private double startMin = 0;
+    private double startMax = 0;
+
+    private boolean pressed = false;
 
     public MriView() {
 
@@ -67,22 +78,73 @@ public class MriView extends JPanel {
             }
         });
 
+        addMouseMotionListener(new MouseMotionListener() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                final int button = e.getButton();
+                if (button == 1) {
+                    mouseX = e.getX();
+                    mouseY = e.getY();
+                    if (getCurrentContext().getMode() == Mode.ERASE) {
+                        int size = 4;
+                        for (int x = mouseX / SCALE - size; x < mouseX / SCALE + size; x++) {
+                            for (int y = mouseY / SCALE - size; y < mouseY / SCALE + size; y++) {
+                                getVolume().data.set(y, scroll, x, 0, EMPTY_VALUE);
+                            }
+                        }
+                        repaint();
+                    }
+                } else if (pressed) {
+                    final int intesityDiff = mouseYPrev - e.getY();
+                    final int shift = e.getX() - mouseXPrev;
+
+                    double newMin = startMin + intesityDiff + shift;
+                    double newMax = startMax - intesityDiff + shift;
+
+                    if (newMax - newMin > 10) {
+                        final double maxRange = getCurrentContext().getMaxIntensityRange();
+                        if (newMin < 0) {
+                            newMin = 0;
+                        }
+                        if (newMax > maxRange) {
+                            newMax = maxRange;
+                        }
+                        System.out.println("new min: " + newMin + " new max: " + newMax);
+                        getCurrentContext().setMinIntensity(newMin);
+                        getCurrentContext().setMaxIntensity(newMax);
+                    }
+
+                    repaint();
+                }
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+            }
+        });
+
         addMouseListener(new MouseListener() {
             public void mouseClicked(MouseEvent e) {
                 mouseX = e.getX();
                 mouseY = e.getY();
-                new Thread(() -> {
-                    getCurrentContext().saveState();
-                    floodFill();
-                }).start();
+                if (getCurrentContext().getMode() == Mode.BUCKET) {
+                    new Thread(() -> {
+                        getCurrentContext().saveState();
+                        floodFill();
+                    }).start();
+                }
             }
 
             public void mousePressed(MouseEvent e) {
-
+                mouseXPrev = e.getX();
+                mouseYPrev = e.getY();
+                startMin = getCurrentContext().getMinIntensity();
+                startMax = getCurrentContext().getMaxIntensity();
+                pressed = true;
             }
 
             public void mouseReleased(MouseEvent e) {
-
+                pressed = false;
             }
 
             public void mouseEntered(MouseEvent e) {

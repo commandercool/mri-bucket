@@ -3,6 +3,7 @@ package com.commandercool;
 import static com.commandercool.context.BucketContext.getCurrentContext;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Label;
@@ -21,6 +22,7 @@ import javax.swing.JSlider;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.commandercool.components.MriView;
+import com.commandercool.context.Mode;
 import com.ericbarnhill.niftijio.NiftiVolume;
 
 public class Application {
@@ -31,7 +33,7 @@ public class Application {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         final MriView mriView = new MriView();
-        frame.setMinimumSize(mriView.getMriDimensions());
+        frame.setMinimumSize(new Dimension(400, (int) mriView.getMriDimensions().getHeight()));
         frame.add(mriView, BorderLayout.CENTER);
 
         frame.pack();
@@ -39,6 +41,14 @@ public class Application {
 
         //Bottom panel
         final JPanel bottom = new JPanel();
+        final JLabel minIntLabel = new JLabel();
+        final JLabel maxIntLabel = new JLabel();
+
+        getCurrentContext().setMaxIntLabel(maxIntLabel);
+        getCurrentContext().setMinIntLabel(minIntLabel);
+
+        bottom.add(minIntLabel);
+        bottom.add(maxIntLabel);
         final JProgressBar progressBar = new JProgressBar();
         getCurrentContext().setProgressBar(progressBar);
         final JButton cancelButton = new JButton("Cancel");
@@ -102,20 +112,25 @@ public class Application {
                 }
                 mriView.repaint();
                 final Dimension mriDimensions = mriView.getMriDimensions();
-                frame.setMinimumSize(mriDimensions);
-                frame.setSize(mriDimensions);
+                final Dimension frameDimension = new Dimension(400, (int) mriView.getMriDimensions().getHeight());
+                frame.setMinimumSize(frameDimension);
+                frame.setSize(frameDimension);
 
-                minSlider.setMaximum((int) mriView.getMaxIntensity());
-                minSlider.setMinimum((int) mriView.getMinIntensity());
+                final double maxIntensity = mriView.getMaxIntensity();
+                final double minIntensity = mriView.getMinIntensity();
+
+                minSlider.setMaximum((int) maxIntensity);
+                minSlider.setMinimum((int) minIntensity);
                 minSlider.setValue(minSlider.getMinimum());
                 minSlider.repaint();
 
-                maxSlider.setMaximum((int) mriView.getMaxIntensity());
-                maxSlider.setMinimum((int) mriView.getMinIntensity());
+                maxSlider.setMaximum((int) maxIntensity);
+                maxSlider.setMinimum((int) minIntensity);
+                getCurrentContext().setMaxIntensityRange(maxIntensity);
                 maxSlider.setValue(maxSlider.getMaximum());
                 maxSlider.repaint();
 
-                System.out.println("Max intensity: " + mriView.getMaxIntensity() + "; min intensity: " + mriView.getMinIntensity());
+                System.out.println("Max intensity: " + maxIntensity + "; min intensity: " + minIntensity);
             }
         });
         file.add(open);
@@ -135,6 +150,20 @@ public class Application {
             mriView.repaint();
         });
         edit.add(undo);
+        edit.addSeparator();
+
+        final JMenuItem erase = new JMenuItem("Erase (Experimental)");
+        erase.addActionListener(e -> {
+            final Mode mode = getCurrentContext().getMode();
+            if (mode == Mode.ERASE) {
+                getCurrentContext().setMode(Mode.BUCKET);
+                mriView.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+            } else if (mode == Mode.BUCKET) {
+                getCurrentContext().setMode(Mode.ERASE);
+                mriView.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+            }
+        });
+        edit.add(erase);
         edit.addSeparator();
 
         final JMenuItem reset = new JMenuItem("Reset");
