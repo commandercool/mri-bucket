@@ -47,7 +47,7 @@ public class MriView extends JPanel {
         this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 
         addMouseWheelListener(e -> {
-            scroll +=e.getUnitsToScroll();
+            scroll += e.getWheelRotation();
             repaint();
         });
 
@@ -109,7 +109,6 @@ public class MriView extends JPanel {
                         if (newMax > maxRange) {
                             newMax = maxRange;
                         }
-                        System.out.println("new min: " + newMin + " new max: " + newMax);
                         getCurrentContext().setMinIntensity(newMin);
                         getCurrentContext().setMaxIntensity(newMax);
                     }
@@ -295,6 +294,7 @@ public class MriView extends JPanel {
         if (point.getY() < volume.header.dim[1] && point.getZ() < volume.header.dim[2]
                 && point.getX() < volume.header.dim[3] && point.getZ() >= 0 && point.getX() >= 0 && point.getY() >= 0) {
             if (filledArray[point.getY()][point.getZ()][point.getX()] == 0) {
+                filledArray[point.getY()][point.getZ()][point.getX()] = 2;
                 toFill.push(point);
             }
         }
@@ -355,8 +355,10 @@ public class MriView extends JPanel {
                     if (filledArray[x][scroll][z] == 1) {
                         g.setColor(new Color(250, 0, 0));
                         g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
+                    } else if (filledArray[x][scroll][z] == 2) {
+                        g.setColor(new Color(0, 0, 250));
+                        g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
                     }
-
                 }
             }
         }
