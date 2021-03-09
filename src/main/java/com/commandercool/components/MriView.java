@@ -11,7 +11,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -211,7 +212,7 @@ public class MriView extends JPanel {
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         final NiftiVolume volume = getVolume();
 
-        LinkedList<Point3D> toFill = new LinkedList<>();
+        List<Point3D> toFill = new ArrayList<>(volume.header.dim[1] * volume.header.dim[2] * volume.header.dim[3] / 10);
 
         final Point3D referencePoint = new Point3D(mouseX / SCALE, mouseY / SCALE, scroll);
         toFill.add(referencePoint);
@@ -225,7 +226,7 @@ public class MriView extends JPanel {
 
         while (!toFill.isEmpty() && !getCurrentContext().isCanceled()) {
             processed++;
-            final Point3D n = toFill.poll();
+            final Point3D n = toFill.remove(toFill.size() - 1);
             final double intensity = valueAt(n.getY(), n.getZ(), n.getX());
 
             final int threshold = getCurrentContext().getThreshold();
@@ -288,14 +289,14 @@ public class MriView extends JPanel {
         return min;
     }
 
-    private void addIfMissing(Point3D point, LinkedList<Point3D> toFill) {
+    private void addIfMissing(Point3D point, List<Point3D> toFill) {
         final NiftiVolume volume = getVolume();
         final byte[][][] filledArray = getFilledArray();
         if (point.getY() < volume.header.dim[1] && point.getZ() < volume.header.dim[2]
                 && point.getX() < volume.header.dim[3] && point.getZ() >= 0 && point.getX() >= 0 && point.getY() >= 0) {
             if (filledArray[point.getY()][point.getZ()][point.getX()] == 0) {
                 filledArray[point.getY()][point.getZ()][point.getX()] = 2;
-                toFill.push(point);
+                toFill.add(point);
             }
         }
     }

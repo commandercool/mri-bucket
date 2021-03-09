@@ -109,6 +109,7 @@ public class Application {
             int returnVal = jFileChooser.showOpenDialog(frame);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
+                    getCurrentContext().setVolume(new NiftiVolume(0,0,0,0));
                     getCurrentContext().setVolume(NiftiVolume.read(jFileChooser.getSelectedFile().getPath()));
                 } catch (IOException ioException) {
                     // ignore
