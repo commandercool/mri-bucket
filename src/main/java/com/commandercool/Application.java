@@ -66,6 +66,9 @@ public class Application {
         final JFileChooser jFileChooser = new JFileChooser();
         jFileChooser.setFileFilter(new FileNameExtensionFilter("MRI Files", "nii"));
 
+        //Export folder chooser
+        final JFileChooser exportFolderChooser = new JFileChooser();
+
         //Tools panel
         final JFrame tools = new JFrame("Tools");
 
@@ -134,6 +137,42 @@ public class Application {
             }
         });
         file.add(open);
+
+        final JMenuItem export = new JMenuItem("Export");
+        export.addActionListener(e -> {
+            final int chooseResult = exportFolderChooser.showOpenDialog(frame);
+            if (chooseResult == JFileChooser.APPROVE_OPTION) {
+                final String path = exportFolderChooser.getSelectedFile().getPath();
+                try {
+                    getCurrentContext().getVolume().write(path);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+        });
+        file.add(export);
+
+        final JMenuItem applyMask = new JMenuItem("Apply Mask");
+        applyMask.addActionListener(e -> {
+            int returnVal = jFileChooser.showOpenDialog(frame);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                try {
+                    final NiftiVolume mask = NiftiVolume.read(jFileChooser.getSelectedFile().getPath());
+                    for (int x = 0; x < mask.header.dim[1]; x++) {
+                        for (int y = 0; y < mask.header.dim[2]; y++) {
+                            for (int z = 0; z < mask.header.dim[3]; z++) {
+                                if (!(mask.data.get(x, y, z, 0) > 0)) {
+                                    getCurrentContext().getVolume().data.set(x, y, z, 0, 0.0);
+                                }
+                            }
+                        }
+                    }
+                } catch (IOException ioException) {
+                    // ignore
+                }
+            }
+        });
+        file.add(applyMask);
 
         final JMenu view = new JMenu("View");
         final JMenuItem toolsMenuItem = new JMenuItem("Tools");

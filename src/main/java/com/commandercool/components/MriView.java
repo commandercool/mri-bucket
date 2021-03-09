@@ -347,7 +347,6 @@ public class MriView extends JPanel {
 
             for (int z = 0; z < nz; z++) {
                 for (int x = 0; x < nx; x++) {
-                    final double data = volume.data.get(x, scroll, z, 0);
                     final int intensity = (int) valueAt(x, scroll, z);
                     g.setColor(new Color(intensity, intensity, intensity));
                     g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
