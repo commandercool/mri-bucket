@@ -10,6 +10,7 @@ import java.awt.Image;
 import java.awt.Label;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.image.MemoryImageSource;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -201,20 +202,33 @@ public class Application {
 
         final Toolkit toolkit = Toolkit.getDefaultToolkit();
         final Image eraserImage = toolkit.getImage(ClassLoader.getSystemClassLoader().getResource("cursors/eraser.png"));
-        final Cursor eraserCursor = toolkit.createCustomCursor(eraserImage.getScaledInstance(4, 4, 0), new Point(0, 0), "Eraser");
+
+        int w = 16;
+        int h = 16;
+        int pix[] = new int[w * h];
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                pix[y + w * x] = Integer.MAX_VALUE;
+            }
+        }
+
+        final MemoryImageSource memoryImageSource = new MemoryImageSource(w, h, pix, 0, w);
+        final Cursor eraserCursor = toolkit.createCustomCursor(toolkit.createImage(memoryImageSource), new Point(0, 0), "Eraser");
 
         final JMenuItem erase = new JMenuItem("Erase (Experimental)");
         erase.addActionListener(e -> {
             final Mode mode = getCurrentContext().getMode();
+            final JMenuItem menuItem = (JMenuItem) e.getSource();
             if (mode == Mode.ERASE) {
-                ((JMenuItem) e.getSource()).setText("Bucket");
+                menuItem.setText("Erase (Experimental)");
                 getCurrentContext().setMode(Mode.BUCKET);
                 mriView.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
             } else if (mode == Mode.BUCKET) {
-                ((JMenuItem) e.getSource()).setText("Erase (Experimental)");
+                menuItem.setText("Bucket");
                 getCurrentContext().setMode(Mode.ERASE);
                 mriView.setCursor(eraserCursor);
             }
+            menuItem.repaint();
         });
         edit.add(erase);
         edit.addSeparator();

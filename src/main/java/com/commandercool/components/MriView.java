@@ -87,8 +87,8 @@ public class MriView extends JPanel {
                     mouseY = e.getY();
                     if (getCurrentContext().getMode() == Mode.ERASE) {
                         int size = 4;
-                        for (int x = mouseX / SCALE - size; x < mouseX / SCALE + size; x++) {
-                            for (int y = mouseY / SCALE - size; y < mouseY / SCALE + size; y++) {
+                        for (int x = mouseX / SCALE; x < mouseX / SCALE + 2 * size; x++) {
+                            for (int y = mouseY / SCALE; y < mouseY / SCALE + 2 * size; y++) {
                                 getCurrentContext().getFilledArray()[y][scroll][x] = 0;
                             }
                         }
