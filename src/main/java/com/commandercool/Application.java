@@ -36,7 +36,8 @@ public class Application {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         final MriView mriView = new MriView();
-        frame.setMinimumSize(new Dimension(400, (int) mriView.getMriDimensions().getHeight()));
+        final int width = 600;
+        frame.setMinimumSize(new Dimension(width, (int) mriView.getMriDimensions().getHeight()));
         frame.add(mriView, BorderLayout.CENTER);
 
         final JPanel toolPanel = new JPanel();
@@ -124,7 +125,7 @@ public class Application {
                     // ignore
                 }
                 mriView.repaint();
-                final Dimension frameDimension = new Dimension(400, (int) mriView.getMriDimensions().getHeight());
+                final Dimension frameDimension = new Dimension(width, (int) mriView.getMriDimensions().getHeight());
                 frame.setMinimumSize(frameDimension);
                 frame.setSize(frameDimension);
 
