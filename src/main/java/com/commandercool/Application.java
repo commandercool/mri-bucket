@@ -6,7 +6,10 @@ import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Image;
 import java.awt.Label;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -35,6 +38,9 @@ public class Application {
         final MriView mriView = new MriView();
         frame.setMinimumSize(new Dimension(400, (int) mriView.getMriDimensions().getHeight()));
         frame.add(mriView, BorderLayout.CENTER);
+
+        final JPanel toolPanel = new JPanel();
+        frame.add(toolPanel, BorderLayout.LINE_END);
 
         frame.pack();
         frame.setVisible(true);
@@ -93,11 +99,14 @@ public class Application {
 
         final JSlider threshold = new JSlider(1, 255);
         threshold.setValue(100);
+        threshold.setPaintTicks(true);
+        threshold.setMajorTickSpacing(50);
+        threshold.setMinorTickSpacing(10);
         threshold.addChangeListener(e -> {
             getCurrentContext().setThreshold(threshold.getValue());
         });
-        tools.add(new JLabel("Threshold (1 to 255):"));
-        tools.add(threshold);
+        toolPanel.add(new JLabel("Threshold:"));
+        toolPanel.add(threshold);
 
         tools.setMinimumSize(new Dimension(256, 256));
 
@@ -115,7 +124,6 @@ public class Application {
                     // ignore
                 }
                 mriView.repaint();
-                final Dimension mriDimensions = mriView.getMriDimensions();
                 final Dimension frameDimension = new Dimension(400, (int) mriView.getMriDimensions().getHeight());
                 frame.setMinimumSize(frameDimension);
                 frame.setSize(frameDimension);
@@ -133,8 +141,6 @@ public class Application {
                 getCurrentContext().setMaxIntensityRange(maxIntensity);
                 maxSlider.setValue(maxSlider.getMaximum());
                 maxSlider.repaint();
-
-                System.out.println("Max intensity: " + maxIntensity + "; min intensity: " + minIntensity);
             }
         });
         file.add(open);
@@ -192,15 +198,21 @@ public class Application {
         edit.add(undo);
         edit.addSeparator();
 
+        final Toolkit toolkit = Toolkit.getDefaultToolkit();
+        final Image eraserImage = toolkit.getImage(ClassLoader.getSystemClassLoader().getResource("cursors/eraser.png"));
+        final Cursor eraserCursor = toolkit.createCustomCursor(eraserImage.getScaledInstance(4, 4, 0), new Point(0, 0), "Eraser");
+
         final JMenuItem erase = new JMenuItem("Erase (Experimental)");
         erase.addActionListener(e -> {
             final Mode mode = getCurrentContext().getMode();
             if (mode == Mode.ERASE) {
+                ((JMenuItem) e.getSource()).setText("Bucket");
                 getCurrentContext().setMode(Mode.BUCKET);
                 mriView.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
             } else if (mode == Mode.BUCKET) {
+                ((JMenuItem) e.getSource()).setText("Erase (Experimental)");
                 getCurrentContext().setMode(Mode.ERASE);
-                mriView.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+                mriView.setCursor(eraserCursor);
             }
         });
         edit.add(erase);

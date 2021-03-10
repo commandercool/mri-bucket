@@ -82,15 +82,14 @@ public class MriView extends JPanel {
         addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                final int button = e.getButton();
-                if (button == 1) {
+                if (getCurrentContext().getMode() == Mode.ERASE) {
                     mouseX = e.getX();
                     mouseY = e.getY();
                     if (getCurrentContext().getMode() == Mode.ERASE) {
                         int size = 4;
                         for (int x = mouseX / SCALE - size; x < mouseX / SCALE + size; x++) {
                             for (int y = mouseY / SCALE - size; y < mouseY / SCALE + size; y++) {
-                                getVolume().data.set(y, scroll, x, 0, EMPTY_VALUE);
+                                getCurrentContext().getFilledArray()[y][scroll][x] = 0;
                             }
                         }
                         repaint();
