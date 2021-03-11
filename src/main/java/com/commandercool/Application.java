@@ -13,6 +13,7 @@ import java.awt.Toolkit;
 import java.awt.image.MemoryImageSource;
 import java.io.IOException;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -34,6 +35,7 @@ public class Application {
     private static void createAndShowGUI() {
         //Create and set up the window.
         JFrame frame = new JFrame("MRI Flood Fill");
+        frame.setIconImage(new ImageIcon(ClassLoader.getSystemClassLoader().getResource("icon.png")).getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         final MriView mriView = new MriView();
