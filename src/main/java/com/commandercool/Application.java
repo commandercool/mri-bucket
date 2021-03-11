@@ -1,12 +1,12 @@
 package com.commandercool;
 
 import static com.commandercool.context.BucketContext.getCurrentContext;
+import static com.commandercool.context.BucketContext.subscribe;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Image;
 import java.awt.Label;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -22,11 +22,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.commandercool.components.MriView;
+import com.commandercool.components.contextaware.ContextAwareProgressBar;
 import com.commandercool.context.Mode;
 import com.ericbarnhill.niftijio.NiftiVolume;
 
@@ -42,6 +42,7 @@ public class Application {
         final int width = 600;
         frame.setMinimumSize(new Dimension(width, (int) mriView.getMriDimensions().getHeight()));
         frame.add(mriView, BorderLayout.CENTER);
+        subscribe(mriView);
 
         final JPanel toolPanel = new JPanel();
         frame.add(toolPanel, BorderLayout.LINE_END);
@@ -59,8 +60,8 @@ public class Application {
 
         bottom.add(minIntLabel);
         bottom.add(maxIntLabel);
-        final JProgressBar progressBar = new JProgressBar();
-        getCurrentContext().setProgressBar(progressBar);
+        final ContextAwareProgressBar progressBar = new ContextAwareProgressBar();
+        subscribe(progressBar);
         final JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(e -> {
             if (getCurrentContext().isFillRunning()) {
@@ -203,7 +204,6 @@ public class Application {
         edit.addSeparator();
 
         final Toolkit toolkit = Toolkit.getDefaultToolkit();
-        final Image eraserImage = toolkit.getImage(ClassLoader.getSystemClassLoader().getResource("cursors/eraser.png"));
 
         int w = 16;
         int h = 16;

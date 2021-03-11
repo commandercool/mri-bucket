@@ -1,7 +1,10 @@
 package com.commandercool.context;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.swing.JLabel;
-import javax.swing.JProgressBar;
 
 import com.commandercool.utils.LimitedQueue;
 import com.ericbarnhill.niftijio.NiftiVolume;
@@ -14,19 +17,36 @@ import lombok.Setter;
 public class BucketContext {
 
     private static BucketContext current = new BucketContext();
+    private static List<IContextUpdateListener> listeners = new ArrayList<>();
+    private static List<ContextProperty> properties = new ArrayList<>();
+
+    static {
+        Arrays.stream(BucketContext.class.getDeclaredFields()).forEach(f -> {
+            if (f.getType().isInstance(ContextProperty.class)) {
+                f.setAccessible(true);
+                try {
+                    properties.add((ContextProperty) f.get(getCurrentContext()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
     private Mode mode = Mode.BUCKET;
     private double maxIntensity = 100;
     private double minIntensity = 0;
 
     private double maxIntensityRange = 100;
-
+    // Flood fill stuff
     private int threshold = 10;
+    private ContextProperty<Integer> progress = new ContextProperty<>(0, 0);
+    private ContextProperty<Integer> toFillSize = new ContextProperty<>(0, 0);
+
     private int minDimension = 0;
     private volatile boolean fillRunning = false;
     private volatile boolean canceled = false;
 
-    private JProgressBar progressBar;
     private JLabel minIntLabel;
     private JLabel maxIntLabel;
 
@@ -35,8 +55,25 @@ public class BucketContext {
 
     private LimitedQueue<State> states = new LimitedQueue<>(10);
 
-    public synchronized static BucketContext getCurrentContext() {
+    public static BucketContext getCurrentContext() {
         return current;
+    }
+
+    public static void subscribe(IContextUpdateListener listener) {
+        listeners.add(listener);
+    }
+
+    static void notifyListeners() {
+        listeners.forEach(l -> l.processUpdate(getCurrentContext()));
+        properties.forEach(ContextProperty::reset);
+    }
+
+    public void setProgress(int progress) {
+        this.progress.setCurrent(progress);
+    }
+
+    public void setToFillSize(int toFillSize) {
+        this.toFillSize.setCurrent(toFillSize);
     }
 
     public void setVolume(NiftiVolume volume) {

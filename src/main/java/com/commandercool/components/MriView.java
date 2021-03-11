@@ -15,9 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 
 import com.commandercool.context.BucketContext;
+import com.commandercool.context.IContextUpdateListener;
 import com.commandercool.context.Mode;
 import com.commandercool.geometry.Point3D;
 import com.ericbarnhill.niftijio.NiftiVolume;
@@ -25,7 +25,7 @@ import com.ericbarnhill.niftijio.NiftiVolume;
 import lombok.Getter;
 
 @Getter
-public class MriView extends JPanel {
+public class MriView extends JPanel implements IContextUpdateListener {
 
     private static final int EMPTY_VALUE = 0;
 
@@ -204,8 +204,8 @@ public class MriView extends JPanel {
     }
 
     public void floodFill() {
-        final JProgressBar progressBar = getCurrentContext().getProgressBar();
-        progressBar.setValue(0);
+        getCurrentContext().setProgress(0);
+        getCurrentContext().setToFillSize(1);
 
         getCurrentContext().setFillRunning(true);
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -220,7 +220,6 @@ public class MriView extends JPanel {
         getCurrentContext().setFilledArray(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
         final byte[][][] filledArray = getFilledArray();
 
-        progressBar.setMaximum(1);
         int processed = 0;
 
         while (!toFill.isEmpty() && !getCurrentContext().isCanceled()) {
@@ -243,12 +242,7 @@ public class MriView extends JPanel {
             } else {
                 filledArray[n.getY()][n.getZ()][n.getX()] = -1;
             }
-            if (toFill.size() > progressBar.getMaximum()) {
-                progressBar.setMaximum(toFill.size());
-            }
-            progressBar.setValue(processed);
-            progressBar.repaint();
-            repaint();
+            getCurrentContext().setProgress(processed);
         }
         getCurrentContext().setCanceled(false);
         getCurrentContext().setFillRunning(false);
@@ -296,6 +290,7 @@ public class MriView extends JPanel {
             if (filledArray[point.getY()][point.getZ()][point.getX()] == 0) {
                 filledArray[point.getY()][point.getZ()][point.getX()] = 2;
                 toFill.add(point);
+                getCurrentContext().setToFillSize(getCurrentContext().getToFillSize().getCurrent() + 1);
             }
         }
     }
@@ -363,4 +358,10 @@ public class MriView extends JPanel {
         }
     }
 
+    @Override
+    public void processUpdate(BucketContext context) {
+        if (context.getProgress().hasChanged()) {
+            repaint();
+        }
+    }
 }
