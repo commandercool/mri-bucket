@@ -54,7 +54,7 @@ public class BucketContext {
     private JLabel maxIntLabel;
 
     private NiftiVolume volume;
-    private byte[][][] filledArray;
+    private MriFill mriFill = new MriFill(0, new byte[0][0][0]);
 
     private LimitedQueue<State> states = new LimitedQueue<>(10);
 
@@ -86,7 +86,7 @@ public class BucketContext {
     public void setVolume(NiftiVolume volume) {
         this.volume = volume;
         this.mriLayer = new MriLayer(-1, new short[volume.header.dim[3]][volume.header.dim[1]]);
-        filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];
+        mriFill = new MriFill(0, new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
     }
 
     public void setMaxIntensity(double maxIntensity) {

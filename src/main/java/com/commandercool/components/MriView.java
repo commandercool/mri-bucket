@@ -2,6 +2,7 @@ package com.commandercool.components;
 
 import static com.commandercool.context.BucketContext.getCurrentContext;
 import static com.commandercool.context.Mode.ERASE;
+import static com.commandercool.graphics.ColorMap.getColor;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -30,6 +31,7 @@ import lombok.Getter;
 public class MriView extends JPanel implements IContextUpdateListener {
 
     private static final int EMPTY_VALUE = 0;
+    public static final Color FILL_COLOR = new Color(250, 0, 0);
 
     private static int SCALE = 2;
 
@@ -99,7 +101,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
                         int scroll = getCurrentContext().getScroll().getCurrent();
                         for (int x = mouseX / SCALE; x < mouseX / SCALE + 2 * size; x++) {
                             for (int y = mouseY / SCALE; y < mouseY / SCALE + 2 * size; y++) {
-                                getCurrentContext().getFilledArray()[y][scroll][x] = 0;
+                                getCurrentContext().getMriFill().getFilledArray()[y][scroll][x] = 0;
                             }
                         }
                         repaint();
@@ -169,7 +171,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
     public void resetSelection() {
         getCurrentContext().saveState();
         final NiftiVolume volume = getVolume();
-        getCurrentContext().setFilledArray(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
+        getCurrentContext().getMriFill().setFilledArray(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
     }
 
     private NiftiVolume getVolume() {
@@ -177,7 +179,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
     }
 
     private byte[][][] getFilledArray() {
-        return getCurrentContext().getFilledArray();
+        return getCurrentContext().getMriFill().getFilledArray();
     }
 
     public void subtractSelection() {
@@ -229,7 +231,8 @@ public class MriView extends JPanel implements IContextUpdateListener {
         toFill.add(referencePoint);
         double reference = valueAt(referencePoint.getY(), referencePoint.getZ(), referencePoint.getX());
 
-        getCurrentContext().setFilledArray(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
+        getCurrentContext().getMriFill()
+                .setFilledArray(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
         final byte[][][] filledArray = getFilledArray();
 
         int processed = 0;
@@ -357,16 +360,14 @@ public class MriView extends JPanel implements IContextUpdateListener {
                     if (mriLayer.getLayer() != scroll) {
                         mriLayer.getCut()[z][x] = (short) valueAt(x, scroll, z);
                     }
-                    short intensity = mriLayer.getCut()[z][x];
-                    g.setColor(new Color(intensity, intensity, intensity));
+
+                    g.setColor(getColor(mriLayer.getCut()[z][x]));
                     g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
 
                     if (filledArray[x][scroll][z] == 1) {
-                        g.setColor(new Color(250, 0, 0));
-                    } else if (filledArray[x][scroll][z] == 2) {
-                        g.setColor(new Color(0, 0, 250));
+                        g.setColor(FILL_COLOR);
+                        g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
                     }
-                    g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
                 }
             }
         }
