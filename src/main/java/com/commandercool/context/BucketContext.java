@@ -91,7 +91,7 @@ public class BucketContext {
 
     public void setMaxIntensity(double maxIntensity) {
         this.maxIntensity = maxIntensity;
-        this.maxIntLabel.setText("max: " + (int) maxIntensity);
+        this.maxIntLabel.setText("max: " + (int) maxIntensity + " v: " + mriFill.getVolume());
     }
 
     public void setMinIntensity(double minIntensity) {
