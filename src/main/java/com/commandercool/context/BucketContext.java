@@ -18,14 +18,14 @@ public class BucketContext {
 
     private static BucketContext current = new BucketContext();
     private static List<IContextUpdateListener> listeners = new ArrayList<>();
-    private static List<ContextProperty> properties = new ArrayList<>();
+    private static List<ContextProperty<Object>> properties = new ArrayList<>();
 
     static {
         Arrays.stream(BucketContext.class.getDeclaredFields()).forEach(f -> {
             if (f.getType().isInstance(ContextProperty.class)) {
                 f.setAccessible(true);
                 try {
-                    properties.add((ContextProperty) f.get(getCurrentContext()));
+                    properties.add((ContextProperty<Object>) f.get(getCurrentContext()));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -38,10 +38,13 @@ public class BucketContext {
     private double minIntensity = 0;
 
     private double maxIntensityRange = 100;
+
+    private MriLayer mriLayer;
     // Flood fill stuff
     private int threshold = 10;
     private ContextProperty<Integer> progress = new ContextProperty<>(0, 0);
     private ContextProperty<Integer> toFillSize = new ContextProperty<>(0, 0);
+    private ContextProperty<Integer> scroll = new ContextProperty<>(0, 0);
 
     private int minDimension = 0;
     private volatile boolean fillRunning = false;
@@ -76,8 +79,13 @@ public class BucketContext {
         this.toFillSize.setCurrent(toFillSize);
     }
 
+    public void setScroll(int scroll) {
+        this.scroll.setCurrent(scroll);
+    }
+
     public void setVolume(NiftiVolume volume) {
         this.volume = volume;
+        this.mriLayer = new MriLayer(-1, new short[volume.header.dim[3]][volume.header.dim[1]]);
         filledArray = new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]];
     }
 

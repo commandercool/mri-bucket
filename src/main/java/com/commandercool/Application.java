@@ -217,12 +217,12 @@ public class Application {
         final MemoryImageSource memoryImageSource = new MemoryImageSource(w, h, pix, 0, w);
         final Cursor eraserCursor = toolkit.createCustomCursor(toolkit.createImage(memoryImageSource), new Point(0, 0), "Eraser");
 
-        final JMenuItem erase = new JMenuItem("Erase (Experimental)");
+        final JMenuItem erase = new JMenuItem("Erase");
         erase.addActionListener(e -> {
             final Mode mode = getCurrentContext().getMode();
             final JMenuItem menuItem = (JMenuItem) e.getSource();
             if (mode == Mode.ERASE) {
-                menuItem.setText("Erase (Experimental)");
+                menuItem.setText("Erase");
                 getCurrentContext().setMode(Mode.BUCKET);
                 mriView.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
             } else if (mode == Mode.BUCKET) {
@@ -261,7 +261,7 @@ public class Application {
         final JMenu layer = new JMenu("Layer");
         final JMenuItem curLower = new JMenuItem("Cut lower");
         curLower.addActionListener(e -> {
-            getCurrentContext().setMinDimension(mriView.getScroll());
+            getCurrentContext().setMinDimension(getCurrentContext().getScroll().getCurrent());
         });
         layer.add(curLower);
 
