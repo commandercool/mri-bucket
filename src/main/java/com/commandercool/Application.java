@@ -1,6 +1,9 @@
 package com.commandercool;
 
 import static com.commandercool.context.BucketContext.getCurrentContext;
+import static java.awt.Cursor.DEFAULT_CURSOR;
+import static java.awt.Cursor.WAIT_CURSOR;
+import static java.awt.Cursor.getPredefinedCursor;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -132,7 +135,7 @@ public class Application {
             int returnVal = jFileChooser.showOpenDialog(frame);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
-                    getCurrentContext().setVolume(new NiftiVolume(0,0,0,0));
+                    getCurrentContext().setVolume(new NiftiVolume(0, 0, 0, 0));
                     getCurrentContext().setVolume(NiftiVolume.read(jFileChooser.getSelectedFile().getPath()));
                 } catch (IOException ioException) {
                     // ignore
@@ -178,22 +181,29 @@ public class Application {
             int returnVal = jFileChooser.showOpenDialog(frame);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
+                    mriView.setCursor(getPredefinedCursor(WAIT_CURSOR));
                     final NiftiVolume mask = NiftiVolume.read(jFileChooser.getSelectedFile().getPath());
                     getCurrentContext().setProgress(0);
                     getCurrentContext().setToFillSize(mask.header.dim[1] + mask.header.dim[2] + mask.header.dim[3]);
-                    for (int x = 0; x < mask.header.dim[1]; x++) {
-                        for (int y = 0; y < mask.header.dim[2]; y++) {
-                            for (int z = 0; z < mask.header.dim[3]; z++) {
-                                getCurrentContext().setProgress(getCurrentContext().getProgress().getCurrent() + 1);
-                                if (!(mask.data.get(x, y, z, 0) > 0)) {
-                                    getCurrentContext().getVolumeWrapper().getVolume().data.set(x, y, z, 0, 0.0);
+                    new Thread(() -> {
+                        for (int x = 0; x < mask.header.dim[1]; x++) {
+                            getCurrentContext().setProgress(
+                                    getCurrentContext().getProgress().getCurrent() + mask.header.dim[2]
+                                            + mask.header.dim[3]);
+                            for (int y = 0; y < mask.header.dim[2]; y++) {
+                                for (int z = 0; z < mask.header.dim[3]; z++) {
+                                    if (!(mask.data.get(x, y, z, 0) > 0)) {
+                                        getCurrentContext().getVolumeWrapper().getVolume().data.set(x, y, z, 0, 0.0);
+                                    }
                                 }
                             }
                         }
-                    }
-                    getCurrentContext().getVolumeWrapper().update();
+                    }).start();
                 } catch (IOException ioException) {
                     // ignore
+                } finally {
+                    //                    getCurrentContext().getVolumeWrapper().update();
+                    mriView.setCursor(getPredefinedCursor(DEFAULT_CURSOR));
                 }
             }
         });
@@ -228,7 +238,8 @@ public class Application {
         }
 
         final MemoryImageSource memoryImageSource = new MemoryImageSource(w, h, pix, 0, w);
-        final Cursor eraserCursor = toolkit.createCustomCursor(toolkit.createImage(memoryImageSource), new Point(0, 0), "Eraser");
+        final Cursor eraserCursor =
+                toolkit.createCustomCursor(toolkit.createImage(memoryImageSource), new Point(0, 0), "Eraser");
 
         final JMenuItem erase = new JMenuItem("Erase");
         erase.addActionListener(e -> {
@@ -237,7 +248,7 @@ public class Application {
             if (mode == Mode.ERASE) {
                 menuItem.setText("Erase");
                 getCurrentContext().setMode(Mode.BUCKET);
-                mriView.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+                mriView.setCursor(getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
             } else if (mode == Mode.BUCKET) {
                 menuItem.setText("Bucket");
                 getCurrentContext().setMode(Mode.ERASE);
@@ -265,7 +276,6 @@ public class Application {
             mriView.invertSelection();
             mriView.repaint();
         });
-
 
         edit.add(reset);
         edit.add(subtract);
