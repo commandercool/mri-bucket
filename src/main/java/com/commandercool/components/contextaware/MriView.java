@@ -2,6 +2,7 @@ package com.commandercool.components.contextaware;
 
 import static com.commandercool.context.BucketContext.getCurrentContext;
 import static com.commandercool.context.BucketContext.subscribe;
+import static com.commandercool.context.Mode.BUCKET;
 import static com.commandercool.context.Mode.ERASE;
 import static com.commandercool.graphics.ColorMap.getColor;
 
@@ -20,7 +21,6 @@ import java.util.List;
 import javax.swing.JPanel;
 
 import com.commandercool.context.BucketContext;
-import com.commandercool.context.Mode;
 import com.commandercool.context.api.IContextUpdateListener;
 import com.commandercool.context.wrappers.MriFill;
 import com.commandercool.context.wrappers.MriLayer;
@@ -141,7 +141,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
             public void mouseClicked(MouseEvent e) {
                 mouseX = e.getX();
                 mouseY = e.getY();
-                if (getCurrentContext().getMode() == Mode.BUCKET) {
+                if (getCurrentContext().getMode() == BUCKET && !getCurrentContext().isFillRunning()) {
                     new Thread(() -> {
                         getCurrentContext().saveState();
                         floodFill();
