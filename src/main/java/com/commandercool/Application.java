@@ -28,6 +28,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.commandercool.components.contextaware.ContextAwareMaxIntLabel;
 import com.commandercool.components.contextaware.ContextAwareMinIntLabel;
 import com.commandercool.components.contextaware.ContextAwareProgressBar;
+import com.commandercool.components.contextaware.ContextAwareVolumeLabel;
 import com.commandercool.components.contextaware.MriView;
 import com.commandercool.context.Mode;
 import com.ericbarnhill.niftijio.NiftiVolume;
@@ -60,12 +61,15 @@ public class Application {
         final JPanel bottom = new JPanel();
         final JLabel minIntLabel = new ContextAwareMinIntLabel();
         final JLabel maxIntLabel = new ContextAwareMaxIntLabel();
+        final JLabel volumeLabel = new ContextAwareVolumeLabel();
 
         getCurrentContext().setMaxIntLabel(maxIntLabel);
         getCurrentContext().setMinIntLabel(minIntLabel);
 
         bottom.add(minIntLabel);
         bottom.add(maxIntLabel);
+        bottom.add(volumeLabel);
+
         final ContextAwareProgressBar progressBar = new ContextAwareProgressBar();
         final JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(e -> {

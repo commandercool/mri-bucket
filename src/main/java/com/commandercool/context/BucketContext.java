@@ -51,6 +51,7 @@ public class BucketContext {
     private ContextProperty<Integer> progress = new ContextProperty<>(0, 0);
     private ContextProperty<Integer> toFillSize = new ContextProperty<>(0, 0);
     private ContextProperty<Integer> scroll = new ContextProperty<>(0, 0);
+    private ContextProperty<Integer> selectedVolume = new ContextProperty<>(0, 0);
 
     private int minDimension = 0;
     private volatile boolean fillRunning = false;
@@ -60,7 +61,7 @@ public class BucketContext {
     private JLabel maxIntLabel;
 
     private VolumeWrapper volumeWrapper = new VolumeWrapper(null);
-    private MriFill mriFill = new MriFill(0, new byte[0][0][0]);
+    private MriFill mriFill = new MriFill(new byte[0][0][0]);
 
     private LimitedQueue<State> states = new LimitedQueue<>(10);
 
@@ -92,7 +93,11 @@ public class BucketContext {
     public void setVolume(NiftiVolume volume) {
         volumeWrapper = new VolumeWrapper(volume);
         mriLayer = new MriLayer(-1, new short[volume.header.dim[3]][volume.header.dim[1]]);
-        mriFill = new MriFill(0, new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
+        mriFill = new MriFill(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
+    }
+
+    public void setSelectedVolume(int selectedVolume) {
+        this.selectedVolume.setCurrent(selectedVolume);
     }
 
     public void setMaxIntensity(int maxIntensity) {
