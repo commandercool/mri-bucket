@@ -20,7 +20,6 @@ public class MriFill {
     public void set(int x, int y, int z, byte value) {
         if (value == 1) {
             volume++;
-            System.out.println(volume);
         }
         filledArray[x][y][z] = value;
     }
