@@ -1,4 +1,6 @@
-package com.commandercool.context;
+package com.commandercool.context.api;
+
+import com.commandercool.context.BucketContext;
 
 public interface IContextUpdateListener {
 

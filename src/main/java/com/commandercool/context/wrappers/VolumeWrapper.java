@@ -1,7 +1,8 @@
-package com.commandercool.context;
+package com.commandercool.context.wrappers;
 
 import static com.commandercool.context.BucketContext.notifyListeners;
 
+import com.commandercool.context.api.IContextProperty;
 import com.ericbarnhill.niftijio.NiftiVolume;
 
 import lombok.Getter;

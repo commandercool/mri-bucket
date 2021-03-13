@@ -1,7 +1,6 @@
 package com.commandercool;
 
 import static com.commandercool.context.BucketContext.getCurrentContext;
-import static com.commandercool.context.BucketContext.subscribe;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -26,8 +25,10 @@ import javax.swing.JSlider;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import com.commandercool.components.MriView;
+import com.commandercool.components.contextaware.ContextAwareMaxIntLabel;
+import com.commandercool.components.contextaware.ContextAwareMinIntLabel;
 import com.commandercool.components.contextaware.ContextAwareProgressBar;
+import com.commandercool.components.contextaware.MriView;
 import com.commandercool.context.Mode;
 import com.ericbarnhill.niftijio.NiftiVolume;
 
@@ -48,7 +49,6 @@ public class Application {
         final int width = 600;
         frame.setMinimumSize(new Dimension(width, (int) mriView.getMriDimensions().getHeight()));
         frame.add(mriView, BorderLayout.CENTER);
-        subscribe(mriView);
 
         final JPanel toolPanel = new JPanel();
         frame.add(toolPanel, BorderLayout.LINE_END);
@@ -58,8 +58,8 @@ public class Application {
 
         //Bottom panel
         final JPanel bottom = new JPanel();
-        final JLabel minIntLabel = new JLabel();
-        final JLabel maxIntLabel = new JLabel();
+        final JLabel minIntLabel = new ContextAwareMinIntLabel();
+        final JLabel maxIntLabel = new ContextAwareMaxIntLabel();
 
         getCurrentContext().setMaxIntLabel(maxIntLabel);
         getCurrentContext().setMinIntLabel(minIntLabel);
@@ -67,7 +67,6 @@ public class Application {
         bottom.add(minIntLabel);
         bottom.add(maxIntLabel);
         final ContextAwareProgressBar progressBar = new ContextAwareProgressBar();
-        subscribe(progressBar);
         final JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(e -> {
             if (getCurrentContext().isFillRunning()) {

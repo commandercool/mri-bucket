@@ -1,4 +1,4 @@
-package com.commandercool.context;
+package com.commandercool.context.api;
 
 public interface IContextProperty {
 

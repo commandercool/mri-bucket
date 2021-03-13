@@ -1,4 +1,4 @@
-package com.commandercool.context;
+package com.commandercool.context.wrappers;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

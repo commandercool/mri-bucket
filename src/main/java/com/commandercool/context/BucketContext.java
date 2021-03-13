@@ -6,6 +6,12 @@ import java.util.List;
 
 import javax.swing.JLabel;
 
+import com.commandercool.context.api.IContextProperty;
+import com.commandercool.context.api.IContextUpdateListener;
+import com.commandercool.context.property.ContextProperty;
+import com.commandercool.context.wrappers.MriFill;
+import com.commandercool.context.wrappers.MriLayer;
+import com.commandercool.context.wrappers.VolumeWrapper;
 import com.commandercool.utils.LimitedQueue;
 import com.ericbarnhill.niftijio.NiftiVolume;
 
@@ -34,8 +40,8 @@ public class BucketContext {
     }
 
     private Mode mode = Mode.BUCKET;
-    private double maxIntensity = 100;
-    private double minIntensity = 0;
+    private ContextProperty<Integer> maxIntensity = new ContextProperty<>(0, 0);
+    private ContextProperty<Integer> minIntensity = new ContextProperty<>(0, 0);
 
     private double maxIntensityRange = 100;
 
@@ -66,7 +72,7 @@ public class BucketContext {
         listeners.add(listener);
     }
 
-    static void notifyListeners() {
+    public static void notifyListeners() {
         listeners.forEach(l -> l.processUpdate(getCurrentContext()));
         properties.forEach(IContextProperty::reset);
     }
@@ -89,41 +95,39 @@ public class BucketContext {
         mriFill = new MriFill(0, new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
     }
 
-    public void setMaxIntensity(double maxIntensity) {
-        this.maxIntensity = maxIntensity;
-        this.maxIntLabel.setText("max: " + (int) maxIntensity + " v: " + mriFill.getVolume());
+    public void setMaxIntensity(int maxIntensity) {
+        this.maxIntensity.setCurrent(maxIntensity);
     }
 
-    public void setMinIntensity(double minIntensity) {
-        this.minIntensity = minIntensity;
-        this.minIntLabel.setText("min: " + (int) minIntensity);
+    public void setMinIntensity(int minIntensity) {
+        this.minIntensity.setCurrent(minIntensity);
     }
 
     public void saveState() {
-//        try {
-//            final FourDimensionalArray data = volume.data;
-//            final Field dataField = data.getClass().getDeclaredField("data");
-//            dataField.setAccessible(true);
-//            dataField.get(data);
-//            states.push(new State(((double[])dataField.get(data)).clone(), filledArray.clone()));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        //        try {
+        //            final FourDimensionalArray data = volume.data;
+        //            final Field dataField = data.getClass().getDeclaredField("data");
+        //            dataField.setAccessible(true);
+        //            dataField.get(data);
+        //            states.push(new State(((double[])dataField.get(data)).clone(), filledArray.clone()));
+        //        } catch (Exception e) {
+        //            e.printStackTrace();
+        //        }
     }
 
     public void undo() {
-//        if (!states.isEmpty()) {
-//            try {
-//                final State state = states.pop();
-//                final FourDimensionalArray data = this.volume.data;
-//                final Field dataField = data.getClass().getDeclaredField("data");
-//                dataField.setAccessible(true);
-//                dataField.set(data, state.getVolumeData());
-//                this.filledArray = state.getFilledArray();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
+        //        if (!states.isEmpty()) {
+        //            try {
+        //                final State state = states.pop();
+        //                final FourDimensionalArray data = this.volume.data;
+        //                final Field dataField = data.getClass().getDeclaredField("data");
+        //                dataField.setAccessible(true);
+        //                dataField.set(data, state.getVolumeData());
+        //                this.filledArray = state.getFilledArray();
+        //            } catch (Exception e) {
+        //                e.printStackTrace();
+        //            }
+        //        }
     }
 
 }

@@ -1,12 +1,19 @@
 package com.commandercool.components.contextaware;
 
+import static com.commandercool.context.BucketContext.subscribe;
+
 import javax.swing.JProgressBar;
 
 import com.commandercool.context.BucketContext;
-import com.commandercool.context.ContextProperty;
-import com.commandercool.context.IContextUpdateListener;
+import com.commandercool.context.api.IContextUpdateListener;
+import com.commandercool.context.property.ContextProperty;
 
 public class ContextAwareProgressBar extends JProgressBar implements IContextUpdateListener {
+
+    public ContextAwareProgressBar() {
+        super();
+        subscribe(this);
+    }
 
     @Override
     public void processUpdate(BucketContext context) {

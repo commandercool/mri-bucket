@@ -1,6 +1,8 @@
-package com.commandercool.context;
+package com.commandercool.context.property;
 
 import static com.commandercool.context.BucketContext.notifyListeners;
+
+import com.commandercool.context.api.IContextProperty;
 
 import lombok.Getter;
 import lombok.Setter;
