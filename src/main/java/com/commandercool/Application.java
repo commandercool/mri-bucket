@@ -162,7 +162,7 @@ public class Application {
             if (chooseResult == JFileChooser.APPROVE_OPTION) {
                 final String path = exportFolderChooser.getSelectedFile().getPath();
                 try {
-                    getCurrentContext().getVolume().write(path);
+                    getCurrentContext().getVolumeWrapper().getVolume().write(path);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -180,11 +180,12 @@ public class Application {
                         for (int y = 0; y < mask.header.dim[2]; y++) {
                             for (int z = 0; z < mask.header.dim[3]; z++) {
                                 if (!(mask.data.get(x, y, z, 0) > 0)) {
-                                    getCurrentContext().getVolume().data.set(x, y, z, 0, 0.0);
+                                    getCurrentContext().getVolumeWrapper().getVolume().data.set(x, y, z, 0, 0.0);
                                 }
                             }
                         }
                     }
+                    getCurrentContext().getVolumeWrapper().update();
                 } catch (IOException ioException) {
                     // ignore
                 }

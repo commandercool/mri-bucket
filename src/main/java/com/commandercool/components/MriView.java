@@ -176,7 +176,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
     }
 
     private NiftiVolume getVolume() {
-        return getCurrentContext().getVolume();
+        return getCurrentContext().getVolumeWrapper().getVolume();
     }
 
     private MriFill getFilledArray() {
@@ -281,7 +281,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
         return max;
     }
 
-    // TODO: move to NiftiVolume
+    // TODO: move to NiftiVolume or to wrapper
     public double getMinIntensity() {
         final NiftiVolume volume = getVolume();
         double min = Double.MAX_VALUE;
@@ -376,7 +376,8 @@ public class MriView extends JPanel implements IContextUpdateListener {
 
     @Override
     public void processUpdate(BucketContext context) {
-        if (context.getProgress().hasChanged() || context.getScroll().hasChanged()) {
+        if (context.getProgress().hasChanged() || context.getScroll().hasChanged() || context.getVolumeWrapper()
+                .hasChanged()) {
             repaint();
         }
     }

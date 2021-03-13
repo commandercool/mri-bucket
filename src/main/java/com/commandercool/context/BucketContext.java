@@ -18,14 +18,14 @@ public class BucketContext {
 
     private static BucketContext current = new BucketContext();
     private static List<IContextUpdateListener> listeners = new ArrayList<>();
-    private static List<ContextProperty<Object>> properties = new ArrayList<>();
+    private static List<IContextProperty> properties = new ArrayList<>();
 
     static {
         Arrays.stream(BucketContext.class.getDeclaredFields()).forEach(f -> {
-            if (f.getType().isInstance(ContextProperty.class)) {
+            if (IContextProperty.class.isAssignableFrom(f.getType())) {
                 f.setAccessible(true);
                 try {
-                    properties.add((ContextProperty<Object>) f.get(getCurrentContext()));
+                    properties.add((IContextProperty) f.get(getCurrentContext()));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -53,7 +53,7 @@ public class BucketContext {
     private JLabel minIntLabel;
     private JLabel maxIntLabel;
 
-    private NiftiVolume volume;
+    private VolumeWrapper volumeWrapper = new VolumeWrapper(null);
     private MriFill mriFill = new MriFill(0, new byte[0][0][0]);
 
     private LimitedQueue<State> states = new LimitedQueue<>(10);
@@ -68,7 +68,7 @@ public class BucketContext {
 
     static void notifyListeners() {
         listeners.forEach(l -> l.processUpdate(getCurrentContext()));
-        properties.forEach(ContextProperty::reset);
+        properties.forEach(IContextProperty::reset);
     }
 
     public void setProgress(int progress) {
@@ -84,8 +84,8 @@ public class BucketContext {
     }
 
     public void setVolume(NiftiVolume volume) {
-        this.volume = volume;
-        this.mriLayer = new MriLayer(-1, new short[volume.header.dim[3]][volume.header.dim[1]]);
+        volumeWrapper = new VolumeWrapper(volume);
+        mriLayer = new MriLayer(-1, new short[volume.header.dim[3]][volume.header.dim[1]]);
         mriFill = new MriFill(0, new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
     }
 

@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ContextProperty<T> {
+public class ContextProperty<T> implements IContextProperty {
 
     private T current;
     private T previous;
@@ -18,10 +18,12 @@ public class ContextProperty<T> {
         this.previous = previous;
     }
 
+    @Override
     public boolean hasChanged() {
         return changed;
     }
 
+    @Override
     public void reset() {
         changed = false;
     }
