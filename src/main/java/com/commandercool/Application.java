@@ -23,6 +23,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.commandercool.components.MriView;
@@ -33,6 +34,11 @@ import com.ericbarnhill.niftijio.NiftiVolume;
 public class Application {
 
     private static void createAndShowGUI() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         //Create and set up the window.
         JFrame frame = new JFrame("MRI Flood Fill");
         frame.setIconImage(new ImageIcon(ClassLoader.getSystemClassLoader().getResource("icon.png")).getImage());
@@ -152,7 +158,7 @@ public class Application {
 
         final JMenuItem export = new JMenuItem("Export");
         export.addActionListener(e -> {
-            final int chooseResult = exportFolderChooser.showOpenDialog(frame);
+            final int chooseResult = exportFolderChooser.showSaveDialog(frame);
             if (chooseResult == JFileChooser.APPROVE_OPTION) {
                 final String path = exportFolderChooser.getSelectedFile().getPath();
                 try {
