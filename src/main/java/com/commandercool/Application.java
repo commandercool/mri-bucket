@@ -179,9 +179,12 @@ public class Application {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     final NiftiVolume mask = NiftiVolume.read(jFileChooser.getSelectedFile().getPath());
+                    getCurrentContext().setProgress(0);
+                    getCurrentContext().setToFillSize(mask.header.dim[1] + mask.header.dim[2] + mask.header.dim[3]);
                     for (int x = 0; x < mask.header.dim[1]; x++) {
                         for (int y = 0; y < mask.header.dim[2]; y++) {
                             for (int z = 0; z < mask.header.dim[3]; z++) {
+                                getCurrentContext().setProgress(getCurrentContext().getProgress().getCurrent() + 1);
                                 if (!(mask.data.get(x, y, z, 0) > 0)) {
                                     getCurrentContext().getVolumeWrapper().getVolume().data.set(x, y, z, 0, 0.0);
                                 }
