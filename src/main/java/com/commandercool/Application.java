@@ -4,6 +4,7 @@ import static com.commandercool.context.BucketContext.getCurrentContext;
 import static java.awt.Cursor.DEFAULT_CURSOR;
 import static java.awt.Cursor.WAIT_CURSOR;
 import static java.awt.Cursor.getPredefinedCursor;
+import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -23,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.UIManager;
@@ -166,9 +168,11 @@ public class Application {
         export.addActionListener(e -> {
             final int chooseResult = exportFolderChooser.showSaveDialog(frame);
             if (chooseResult == JFileChooser.APPROVE_OPTION) {
-                final String path = exportFolderChooser.getSelectedFile().getPath();
                 try {
+                    final String path = exportFolderChooser.getSelectedFile().getPath();
                     getCurrentContext().getVolumeWrapper().getVolume().write(path);
+                    JOptionPane.showMessageDialog(frame, "The nifti file is saved in location: " + path,
+                            "The file was exported", INFORMATION_MESSAGE);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -202,7 +206,6 @@ public class Application {
                 } catch (IOException ioException) {
                     // ignore
                 } finally {
-                    //                    getCurrentContext().getVolumeWrapper().update();
                     mriView.setCursor(getPredefinedCursor(DEFAULT_CURSOR));
                 }
             }
@@ -230,7 +233,7 @@ public class Application {
 
         int w = 16;
         int h = 16;
-        int pix[] = new int[w * h];
+        int[] pix = new int[w * h];
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
                 pix[y + w * x] = Integer.MAX_VALUE;
