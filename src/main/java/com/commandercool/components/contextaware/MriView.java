@@ -221,6 +221,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
     public void floodFill() {
         getCurrentContext().setProgress(0);
         getCurrentContext().setToFillSize(1);
+        getCurrentContext().setSelectedVolume(0);
 
         getCurrentContext().setFillRunning(true);
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
