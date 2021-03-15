@@ -96,8 +96,23 @@ public class BucketContext {
         mriFill = new MriFill(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
     }
 
-    public void setSelectedVolume(int selectedVolume) {
-        this.selectedVolume.setCurrent(selectedVolume);
+    public void clearSelectedVolume() {
+        this.selectedVolume.setCurrent(0);
+    }
+
+    public void updateSelectedVolume() {
+        byte[][][] filledArray = getMriFill().getFilledArray();
+        int volumeSize = 0;
+        for (int i = 0; i < filledArray.length; i++) {
+            for (int j = 0; j < filledArray[0].length; j++) {
+                for (int k = 0; k < filledArray[0][0].length; k++) {
+                    if (filledArray[i][j][k] == 1) {
+                        volumeSize++;
+                    }
+                }
+            }
+        }
+        this.selectedVolume.setCurrent(volumeSize);
     }
 
     public void setMaxIntensity(int maxIntensity) {

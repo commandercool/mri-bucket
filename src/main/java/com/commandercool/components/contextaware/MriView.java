@@ -202,7 +202,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
     }
 
     public void invertSelection() {
-        getCurrentContext().saveState();
+        getCurrentContext().clearSelectedVolume();
         final NiftiVolume volume = getVolume();
         final MriFill mriFill = getFilledArray();
         for (int i = 0; i < volume.header.dim[1]; i++) {
@@ -216,12 +216,13 @@ public class MriView extends JPanel implements IContextUpdateListener {
                 }
             }
         }
+        getCurrentContext().updateSelectedVolume();
     }
 
     public void floodFill() {
         getCurrentContext().setProgress(0);
         getCurrentContext().setToFillSize(1);
-        getCurrentContext().setSelectedVolume(0);
+        getCurrentContext().clearSelectedVolume();
 
         getCurrentContext().setFillRunning(true);
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -265,6 +266,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
         }
         getCurrentContext().setCanceled(false);
         getCurrentContext().setFillRunning(false);
+        getCurrentContext().updateSelectedVolume();
         this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
     }
 
@@ -383,7 +385,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
     @Override
     public void processUpdate(BucketContext context) {
         if (context.getProgress().hasChanged() || context.getScroll().hasChanged() || context.getVolumeWrapper()
-                .hasChanged()) {
+                .hasChanged() || getCurrentContext().getSelectedVolume().hasChanged()) {
             repaint();
         }
     }

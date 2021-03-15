@@ -2,6 +2,7 @@ package com.commandercool;
 
 import static com.commandercool.context.BucketContext.getCurrentContext;
 import static com.commandercool.error.ErrorReporter.reportError;
+import static com.commandercool.error.ErrorReporter.setFrame;
 import static java.awt.Cursor.DEFAULT_CURSOR;
 import static java.awt.Cursor.WAIT_CURSOR;
 import static java.awt.Cursor.getPredefinedCursor;
@@ -43,11 +44,12 @@ public class Application {
 
     private static void createAndShowGUI() {
         JFrame frame = new JFrame("MRI Flood Fill");
+        setFrame(frame);
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-            reportError(frame, e);
+            reportError(e);
             e.printStackTrace();
         }
         //Create and set up the window.
@@ -143,7 +145,7 @@ public class Application {
                     getCurrentContext().setVolume(new NiftiVolume(0, 0, 0, 0));
                     getCurrentContext().setVolume(NiftiVolume.read(jFileChooser.getSelectedFile().getPath()));
                 } catch (IOException ioException) {
-                    reportError(frame, ioException);
+                    reportError(ioException);
                 }
                 mriView.repaint();
                 final Dimension frameDimension = new Dimension(width, (int) mriView.getMriDimensions().getHeight());
@@ -178,10 +180,11 @@ public class Application {
                             "The file was exported", INFORMATION_MESSAGE);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
-                    reportError(frame, ioException);
+                    reportError(ioException);
                 }
             }
         });
+        file.addSeparator();
         file.add(export);
 
         final JMenuItem applyMask = new JMenuItem("Apply Mask");
@@ -208,12 +211,13 @@ public class Application {
                         }
                     }).start();
                 } catch (IOException ioException) {
-                    reportError(frame, ioException);
+                    reportError(ioException);
                 } finally {
                     mriView.setCursor(getPredefinedCursor(DEFAULT_CURSOR));
                 }
             }
         });
+        file.addSeparator();
         file.add(applyMask);
 
         final JMenu view = new JMenu("View");
@@ -281,7 +285,6 @@ public class Application {
         final JMenuItem invert = new JMenuItem("Invert");
         invert.addActionListener(e -> {
             mriView.invertSelection();
-            mriView.repaint();
         });
 
         edit.add(reset);
