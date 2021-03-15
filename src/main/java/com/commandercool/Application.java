@@ -1,6 +1,7 @@
 package com.commandercool;
 
 import static com.commandercool.context.BucketContext.getCurrentContext;
+import static com.commandercool.error.ErrorReporter.reportError;
 import static java.awt.Cursor.DEFAULT_CURSOR;
 import static java.awt.Cursor.WAIT_CURSOR;
 import static java.awt.Cursor.getPredefinedCursor;
@@ -41,13 +42,15 @@ import com.ericbarnhill.niftijio.NiftiVolume;
 public class Application {
 
     private static void createAndShowGUI() {
+        JFrame frame = new JFrame("MRI Flood Fill");
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
+            reportError(frame, e);
             e.printStackTrace();
         }
         //Create and set up the window.
-        JFrame frame = new JFrame("MRI Flood Fill");
         frame.setIconImage(new ImageIcon(ClassLoader.getSystemClassLoader().getResource("icon.png")).getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -140,7 +143,7 @@ public class Application {
                     getCurrentContext().setVolume(new NiftiVolume(0, 0, 0, 0));
                     getCurrentContext().setVolume(NiftiVolume.read(jFileChooser.getSelectedFile().getPath()));
                 } catch (IOException ioException) {
-                    // ignore
+                    reportError(frame, ioException);
                 }
                 mriView.repaint();
                 final Dimension frameDimension = new Dimension(width, (int) mriView.getMriDimensions().getHeight());
@@ -175,6 +178,7 @@ public class Application {
                             "The file was exported", INFORMATION_MESSAGE);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
+                    reportError(frame, ioException);
                 }
             }
         });
@@ -204,7 +208,7 @@ public class Application {
                         }
                     }).start();
                 } catch (IOException ioException) {
-                    // ignore
+                    reportError(frame, ioException);
                 } finally {
                     mriView.setCursor(getPredefinedCursor(DEFAULT_CURSOR));
                 }
