@@ -141,7 +141,8 @@ public class MriView extends JPanel implements IContextUpdateListener {
             public void mouseClicked(MouseEvent e) {
                 mouseX = e.getX();
                 mouseY = e.getY();
-                if (getCurrentContext().getMode() == BUCKET && !getCurrentContext().isFillRunning()) {
+                if (getCurrentContext().getMode() == BUCKET && !getCurrentContext().isFillRunning()
+                        && getCurrentContext().getVolumeWrapper().getVolume() != null) {
                     new Thread(() -> {
                         getCurrentContext().saveState();
                         floodFill();

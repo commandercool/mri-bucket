@@ -220,13 +220,6 @@ public class Application {
         file.addSeparator();
         file.add(applyMask);
 
-        final JMenu view = new JMenu("View");
-        final JMenuItem toolsMenuItem = new JMenuItem("Tools");
-        toolsMenuItem.addActionListener(e -> {
-            tools.setVisible(!tools.isVisible());
-        });
-        view.add(toolsMenuItem);
-
         final JMenu edit = new JMenu("Edit");
 
         final JMenuItem undo = new JMenuItem("Undo");
@@ -299,7 +292,6 @@ public class Application {
         layer.add(curLower);
 
         jMenuBar.add(file);
-        jMenuBar.add(view);
         jMenuBar.add(edit);
         jMenuBar.add(layer);
 
