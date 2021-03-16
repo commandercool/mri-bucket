@@ -348,7 +348,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
     public Dimension getMriDimensions() {
         final NiftiVolume volume = getVolume();
         if (volume != null) {
-            return new Dimension(volume.header.dim[3] * SCALE + 15, volume.header.dim[2] * SCALE + 36);
+            return new Dimension(volume.header.dim[3] * SCALE, volume.header.dim[2] * SCALE);
         } else {
             return new Dimension(480, 480);
         }
@@ -390,8 +390,12 @@ public class MriView extends JPanel implements IContextUpdateListener {
 
     @Override
     public void processUpdate(BucketContext context) {
-        if (context.getScroll().hasChanged() || context.getVolumeWrapper().hasChanged() || getCurrentContext()
-                .getSelectedVolume().hasChanged()) {
+        if (context.getVolumeWrapper().hasChanged()) {
+            setPreferredSize(getMriDimensions());
+            repaint();
+            return;
+        }
+        if (context.getScroll().hasChanged() || getCurrentContext().getSelectedVolume().hasChanged()) {
             repaint();
         }
     }

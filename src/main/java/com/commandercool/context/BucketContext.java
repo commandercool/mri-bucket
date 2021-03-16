@@ -48,10 +48,10 @@ public class BucketContext {
     private MriLayer mriLayer;
     // Flood fill stuff
     private int threshold = 10;
-    private ContextProperty<Integer> progress = new ContextProperty<>(0, 0);
-    private ContextProperty<Integer> toFillSize = new ContextProperty<>(0, 0);
-    private ContextProperty<Integer> scroll = new ContextProperty<>(0, 0);
-    private ContextProperty<Integer> selectedVolume = new ContextProperty<>(0, 0);
+    private final ContextProperty<Integer> progress = new ContextProperty<>(0, 0);
+    private final ContextProperty<Integer> toFillSize = new ContextProperty<>(0, 0);
+    private final ContextProperty<Integer> scroll = new ContextProperty<>(0, 0);
+    private final ContextProperty<Integer> selectedVolume = new ContextProperty<>(0, 0);
 
     private int minDimension = 0;
     private volatile boolean fillRunning = false;
@@ -60,7 +60,7 @@ public class BucketContext {
     private JLabel minIntLabel;
     private JLabel maxIntLabel;
 
-    private VolumeWrapper volumeWrapper = new VolumeWrapper(null);
+    private final VolumeWrapper volumeWrapper = new VolumeWrapper();
     private MriFill mriFill = new MriFill(new byte[0][0][0]);
 
     private LimitedQueue<State> states = new LimitedQueue<>(10);
@@ -91,7 +91,7 @@ public class BucketContext {
     }
 
     public void setVolume(NiftiVolume volume) {
-        volumeWrapper = new VolumeWrapper(volume);
+        volumeWrapper.setVolume(volume);
         mriLayer = new MriLayer(-1, new short[volume.header.dim[3]][volume.header.dim[1]]);
         mriFill = new MriFill(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
     }

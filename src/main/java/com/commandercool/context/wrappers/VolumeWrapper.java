@@ -6,20 +6,15 @@ import com.commandercool.context.api.IContextProperty;
 import com.ericbarnhill.niftijio.NiftiVolume;
 
 import lombok.Getter;
-import lombok.Setter;
 
 public class VolumeWrapper implements IContextProperty {
 
     @Getter
-    @Setter
     private NiftiVolume volume;
-    private boolean updated = false;
+    private volatile boolean updated = false;
 
-    public VolumeWrapper(NiftiVolume volume) {
+    public void setVolume(NiftiVolume volume) {
         this.volume = volume;
-    }
-
-    public void update() {
         updated = true;
         notifyListeners();
     }

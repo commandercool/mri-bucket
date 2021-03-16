@@ -56,10 +56,12 @@ public class Application {
         frame.setIconImage(new ImageIcon(ClassLoader.getSystemClassLoader().getResource("icon.png")).getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        JPanel center = new JPanel(new FlowLayout(FlowLayout.LEFT));
         final MriView mriView = new MriView();
+        center.add(mriView);
         final int width = 600;
         frame.setMinimumSize(new Dimension(width, (int) mriView.getMriDimensions().getHeight()));
-        frame.add(mriView, BorderLayout.CENTER);
+        frame.add(center, BorderLayout.CENTER);
 
         final JPanel toolPanel = new JPanel();
         frame.add(toolPanel, BorderLayout.LINE_END);
