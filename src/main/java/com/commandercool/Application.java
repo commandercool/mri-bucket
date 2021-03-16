@@ -197,17 +197,22 @@ public class Application {
                     getCurrentContext().setProgress(0);
                     getCurrentContext().setToFillSize(mask.header.dim[1] + mask.header.dim[2] + mask.header.dim[3]);
                     new Thread(() -> {
-                        for (int x = 0; x < mask.header.dim[1]; x++) {
-                            getCurrentContext().setProgress(
-                                    getCurrentContext().getProgress().getCurrent() + mask.header.dim[2]
-                                            + mask.header.dim[3]);
-                            for (int y = 0; y < mask.header.dim[2]; y++) {
-                                for (int z = 0; z < mask.header.dim[3]; z++) {
-                                    if (!(mask.data.get(x, y, z, 0) > 0)) {
-                                        getCurrentContext().getVolumeWrapper().getVolume().data.set(x, y, z, 0, 0.0);
+                        try {
+                            for (int x = 0; x < mask.header.dim[1]; x++) {
+                                getCurrentContext().setProgress(
+                                        getCurrentContext().getProgress().getCurrent() + mask.header.dim[2]
+                                                + mask.header.dim[3]);
+                                for (int y = 0; y < mask.header.dim[2]; y++) {
+                                    for (int z = 0; z < mask.header.dim[3]; z++) {
+                                        if (!(mask.data.get(x, y, z, 0) > 0)) {
+                                            getCurrentContext().getVolumeWrapper().getVolume().data
+                                                    .set(x, y, z, 0, 0.0);
+                                        }
                                     }
                                 }
                             }
+                        } catch (Exception exception) {
+                            reportError(exception);
                         }
                     }).start();
                 } catch (IOException ioException) {
