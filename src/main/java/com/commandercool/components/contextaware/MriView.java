@@ -175,7 +175,8 @@ public class MriView extends JPanel implements IContextUpdateListener {
     public void resetSelection() {
         getCurrentContext().saveState();
         final NiftiVolume volume = getVolume();
-        getCurrentContext().getMriFill().setFilledArray(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
+        getCurrentContext().getMriFill()
+                .setFilledArray(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
     }
 
     private NiftiVolume getVolume() {
@@ -212,7 +213,8 @@ public class MriView extends JPanel implements IContextUpdateListener {
                     if (mriFill.getFilledArray()[i][j][k] == 1) {
                         mriFill.set(i, j, k, (byte) 0);
                     } else {
-                        mriFill.set(i, j, k, (byte) 1);;
+                        mriFill.set(i, j, k, (byte) 1);
+                        ;
                     }
                 }
             }
@@ -252,6 +254,9 @@ public class MriView extends JPanel implements IContextUpdateListener {
 
             if ((int) intensity != EMPTY_VALUE && Math.abs(intensity - reference) < threshold) {
                 mriFill.set(n.getY(), n.getZ(), n.getX(), (byte) 1);
+                if (n.getZ() == getCurrentContext().getScroll().getCurrent()) {
+                    repaint();
+                }
                 for (int i = -1; i < 2; i++) {
                     for (int j = -1; j < 2; j++) {
                         if (i != 0 || j != 0) {
@@ -336,7 +341,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
         } else if (value > maxIntensity) {
             return 255;
         } else {
-            return (int) (value - minIntensity + 1)/ k;
+            return (int) (value - minIntensity + 1) / k;
         }
     }
 
@@ -385,8 +390,8 @@ public class MriView extends JPanel implements IContextUpdateListener {
 
     @Override
     public void processUpdate(BucketContext context) {
-        if (context.getProgress().hasChanged() || context.getScroll().hasChanged() || context.getVolumeWrapper()
-                .hasChanged() || getCurrentContext().getSelectedVolume().hasChanged()) {
+        if (context.getScroll().hasChanged() || context.getVolumeWrapper().hasChanged() || getCurrentContext()
+                .getSelectedVolume().hasChanged()) {
             repaint();
         }
     }
