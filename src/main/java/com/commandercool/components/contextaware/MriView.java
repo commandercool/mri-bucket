@@ -60,8 +60,8 @@ public class MriView extends JPanel implements IContextUpdateListener {
             final short ny = getVolume().header.dim[2];
             if (scroll >= ny) {
                 scroll = ny - 1;
-            } else if (scroll <= getCurrentContext().getMinDimension()) {
-                scroll = getCurrentContext().getMinDimension();
+            } else if (scroll <= 0) {
+                scroll = 0;
             }
             getCurrentContext().setScroll(scroll);
         });
@@ -210,11 +210,12 @@ public class MriView extends JPanel implements IContextUpdateListener {
         for (int i = 0; i < volume.header.dim[1]; i++) {
             for (int j = 0; j < volume.header.dim[2]; j++) {
                 for (int k = 0; k < volume.header.dim[3]; k++) {
-                    if (mriFill.getFilledArray()[i][j][k] == 1) {
-                        mriFill.set(i, j, k, (byte) 0);
-                    } else {
-                        mriFill.set(i, j, k, (byte) 1);
-                        ;
+                    if (j >= getCurrentContext().getMinDimension().getCurrent()) {
+                        if (mriFill.getFilledArray()[i][j][k] == 1) {
+                            mriFill.set(i, j, k, (byte) 0);
+                        } else {
+                            mriFill.set(i, j, k, (byte) 1);
+                        }
                     }
                 }
             }
@@ -313,7 +314,8 @@ public class MriView extends JPanel implements IContextUpdateListener {
         final NiftiVolume volume = getVolume();
         final MriFill mriFill = getFilledArray();
         if (point.getY() < volume.header.dim[1] && point.getZ() < volume.header.dim[2]
-                && point.getX() < volume.header.dim[3] && point.getZ() >= 0 && point.getX() >= 0 && point.getY() >= 0) {
+                && point.getX() < volume.header.dim[3] && point.getZ() >= getCurrentContext().getMinDimension()
+                .getCurrent() && point.getX() >= 0 && point.getY() >= 0) {
             if (mriFill.getFilledArray()[point.getY()][point.getZ()][point.getX()] == 0) {
                 mriFill.set(point.getY(), point.getZ(), point.getX(), (byte) 2);
                 toFill.add(point);
@@ -376,7 +378,11 @@ public class MriView extends JPanel implements IContextUpdateListener {
                         mriLayer.getCut()[z][x] = (short) valueAt(x, scroll, z);
                     }
 
-                    g.setColor(getColor(mriLayer.getCut()[z][x]));
+                    Color color = getColor(mriLayer.getCut()[z][x]);
+                    if (scroll == getCurrentContext().getMinDimension().getCurrent()) {
+                        color = new Color(0, color.getGreen(), 0);
+                    }
+                    g.setColor(color);
                     g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
 
                     if (filledArray.getFilledArray()[x][scroll][z] == 1) {
@@ -395,7 +401,8 @@ public class MriView extends JPanel implements IContextUpdateListener {
             repaint();
             return;
         }
-        if (context.getScroll().hasChanged() || getCurrentContext().getSelectedVolume().hasChanged()) {
+        if (context.getScroll().hasChanged() || getCurrentContext().getSelectedVolume().hasChanged()
+                || getCurrentContext().getMinDimension().hasChanged()) {
             repaint();
         }
     }

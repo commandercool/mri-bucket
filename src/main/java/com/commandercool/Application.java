@@ -294,7 +294,7 @@ public class Application {
         final JMenu layer = new JMenu("Layer");
         final JMenuItem curLower = new JMenuItem("Cut lower");
         curLower.addActionListener(e -> {
-            getCurrentContext().setMinDimension(getCurrentContext().getScroll().getCurrent());
+            getCurrentContext().getMinDimension().setCurrent(getCurrentContext().getScroll().getCurrent());
         });
         layer.add(curLower);
 

@@ -52,8 +52,8 @@ public class BucketContext {
     private final ContextProperty<Integer> toFillSize = new ContextProperty<>(0, 0);
     private final ContextProperty<Integer> scroll = new ContextProperty<>(0, 0);
     private final ContextProperty<Integer> selectedVolume = new ContextProperty<>(0, 0);
+    private final ContextProperty<Integer> minDimension = new ContextProperty<>(0, 0);
 
-    private int minDimension = 0;
     private volatile boolean fillRunning = false;
     private volatile boolean canceled = false;
 
