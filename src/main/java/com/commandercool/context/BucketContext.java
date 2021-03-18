@@ -1,5 +1,7 @@
 package com.commandercool.context;
 
+import static com.commandercool.error.ErrorReporter.reportError;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -77,6 +79,22 @@ public class BucketContext {
     public static void notifyListeners() {
         listeners.forEach(l -> l.processUpdate(getCurrentContext()));
         properties.forEach(IContextProperty::reset);
+    }
+
+    public void setMinDimension(int dimension) {
+        if (dimension > maxDimension.getCurrent()) {
+            reportError(new IllegalArgumentException("Lower layer can't be on top of higher one."));
+        } else {
+            minDimension.setCurrent(dimension);
+        }
+    }
+
+    public void setMaxDimension(int dimension) {
+        if (dimension < minDimension.getCurrent()) {
+            reportError(new IllegalArgumentException("Higher layer can't be below lower one."));
+        } else {
+            maxDimension.setCurrent(dimension);
+        }
     }
 
     public void setProgress(int progress) {

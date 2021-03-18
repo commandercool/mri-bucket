@@ -314,12 +314,12 @@ public class Application {
         final JMenu layer = new JMenu("Layer");
         final JMenuItem curLower = new JMenuItem("Cut lower");
         curLower.addActionListener(e -> {
-            getCurrentContext().getMinDimension().setCurrent(getCurrentContext().getScroll().getCurrent());
+            getCurrentContext().setMinDimension(getCurrentContext().getScroll().getCurrent());
         });
         layer.add(curLower);
         JMenuItem cutAbove = new JMenuItem("Cut above");
         cutAbove.addActionListener(e -> {
-            getCurrentContext().getMaxDimension().setCurrent(getCurrentContext().getScroll().getCurrent());
+            getCurrentContext().setMaxDimension(getCurrentContext().getScroll().getCurrent());
         });
         layer.add(cutAbove);
 
