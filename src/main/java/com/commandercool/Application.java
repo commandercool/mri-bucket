@@ -1,6 +1,7 @@
 package com.commandercool;
 
 import static com.commandercool.context.BucketContext.getCurrentContext;
+import static com.commandercool.context.BucketContext.subscribe;
 import static com.commandercool.error.ErrorReporter.reportError;
 import static com.commandercool.error.ErrorReporter.setFrame;
 import static java.awt.Cursor.DEFAULT_CURSOR;
@@ -35,6 +36,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.commandercool.components.contextaware.ContextAwareMaxIntLabel;
 import com.commandercool.components.contextaware.ContextAwareMinIntLabel;
 import com.commandercool.components.contextaware.ContextAwareProgressBar;
+import com.commandercool.components.contextaware.ContextAwareScrollPanel;
 import com.commandercool.components.contextaware.ContextAwareVolumeLabel;
 import com.commandercool.components.contextaware.MriView;
 import com.commandercool.context.Mode;
@@ -61,6 +63,11 @@ public class Application {
         center.add(mriView);
         final int width = 600;
         frame.setMinimumSize(new Dimension(width, (int) mriView.getMriDimensions().getHeight()));
+
+        ContextAwareScrollPanel scrollPanel = new ContextAwareScrollPanel();
+        subscribe(scrollPanel);
+        center.add(scrollPanel);
+
         frame.add(center, BorderLayout.CENTER);
 
         final JPanel toolPanel = new JPanel();
