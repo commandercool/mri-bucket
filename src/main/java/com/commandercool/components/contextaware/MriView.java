@@ -386,7 +386,11 @@ public class MriView extends JPanel implements IContextUpdateListener {
                     g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
 
                     if (filledArray.getFilledArray()[x][scroll][z] == 1) {
-                        g.setColor(FILL_COLOR);
+                        if (scroll == getCurrentContext().getMinDimension().getCurrent()) {
+                            g.setColor(new Color(255, color.getGreen(), 0));
+                        } else {
+                            g.setColor(FILL_COLOR);
+                        }
                         g.fillRect(z * SCALE, x * SCALE, SCALE, SCALE);
                     }
                 }
