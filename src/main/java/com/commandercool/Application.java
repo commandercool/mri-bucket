@@ -287,9 +287,22 @@ public class Application {
             mriView.invertSelection();
         });
 
+        JMenuItem clearLower = new JMenuItem("Clear lower");
+        clearLower.addActionListener(e ->{
+            mriView.removeLower();
+        });
+
+        JMenuItem clearAbove = new JMenuItem("Clear above");
+        clearAbove.addActionListener(e -> {
+            mriView.removeAbove();
+        });
+
         edit.add(reset);
         edit.add(subtract);
         edit.add(invert);
+        edit.addSeparator();
+        edit.add(clearLower);
+        edit.add(clearAbove);
 
         final JMenu layer = new JMenu("Layer");
         final JMenuItem curLower = new JMenuItem("Cut lower");
@@ -297,6 +310,11 @@ public class Application {
             getCurrentContext().getMinDimension().setCurrent(getCurrentContext().getScroll().getCurrent());
         });
         layer.add(curLower);
+        JMenuItem cutAbove = new JMenuItem("Cut above");
+        cutAbove.addActionListener(e -> {
+            getCurrentContext().getMaxDimension().setCurrent(getCurrentContext().getScroll().getCurrent());
+        });
+        layer.add(cutAbove);
 
         jMenuBar.add(file);
         jMenuBar.add(edit);

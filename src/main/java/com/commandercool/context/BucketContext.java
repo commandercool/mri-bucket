@@ -53,6 +53,7 @@ public class BucketContext {
     private final ContextProperty<Integer> scroll = new ContextProperty<>(0, 0);
     private final ContextProperty<Integer> selectedVolume = new ContextProperty<>(0, 0);
     private final ContextProperty<Integer> minDimension = new ContextProperty<>(0, 0);
+    private final ContextProperty<Integer> maxDimension = new ContextProperty<>(0, 0);
 
     private volatile boolean fillRunning = false;
     private volatile boolean canceled = false;
@@ -92,6 +93,7 @@ public class BucketContext {
 
     public void setVolume(NiftiVolume volume) {
         volumeWrapper.setVolume(volume);
+        maxDimension.setCurrent((int) volume.header.dim[2]);
         mriLayer = new MriLayer(-1, new short[volume.header.dim[3]][volume.header.dim[1]]);
         mriFill = new MriFill(new byte[volume.header.dim[1]][volume.header.dim[2]][volume.header.dim[3]]);
     }
