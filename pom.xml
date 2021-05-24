@@ -15,11 +15,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.ericbarnhill</groupId>
-            <artifactId>niftijio</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.16</version>

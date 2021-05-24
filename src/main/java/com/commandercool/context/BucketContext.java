@@ -50,6 +50,7 @@ public class BucketContext {
     private MriLayer mriLayer;
     // Flood fill stuff
     private int threshold = 10;
+    private final ContextProperty<Integer> scale = new ContextProperty<>(1, 1);
     private final ContextProperty<Integer> progress = new ContextProperty<>(0, 0);
     private final ContextProperty<Integer> toFillSize = new ContextProperty<>(0, 0);
     private final ContextProperty<Integer> scroll = new ContextProperty<>(0, 0);
@@ -99,6 +100,10 @@ public class BucketContext {
 
     public void setProgress(int progress) {
         this.progress.setCurrent(progress);
+    }
+
+    public void setScale(int scale) {
+        this.scale.setCurrent(scale);
     }
 
     public void setToFillSize(int toFillSize) {
