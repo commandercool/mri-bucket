@@ -58,7 +58,7 @@ public class Application {
         frame.setIconImage(new ImageIcon(ClassLoader.getSystemClassLoader().getResource("icon.png")).getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JPanel center = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel center = new JPanel();
         final MriView mriView = new MriView();
         center.add(mriView);
         final int width = 600;
@@ -71,7 +71,7 @@ public class Application {
         frame.add(center, BorderLayout.CENTER);
 
         final JPanel toolPanel = new JPanel();
-        frame.add(toolPanel, BorderLayout.LINE_END);
+//        frame.add(toolPanel, BorderLayout.LINE_END);
 
         frame.pack();
         frame.setVisible(true);
@@ -157,7 +157,7 @@ public class Application {
                     reportError(ioException);
                 }
                 mriView.repaint();
-                final Dimension frameDimension = new Dimension(width, (int) mriView.getMriDimensions().getHeight());
+                final Dimension frameDimension = new Dimension((int) mriView.getMriDimensions().getWidth(), (int) mriView.getMriDimensions().getHeight());
                 frame.setMinimumSize(frameDimension);
                 frame.setSize(frameDimension);
 

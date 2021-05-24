@@ -35,7 +35,7 @@ public class MriView extends JPanel implements IContextUpdateListener {
     private static final int EMPTY_VALUE = 0;
     public static final Color FILL_COLOR = new Color(250, 0, 0);
 
-    private static int SCALE = 2;
+    private static int SCALE = 1;
 
     private int mouseX = 0;
     private int mouseY = 0;

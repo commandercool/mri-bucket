@@ -19,14 +19,16 @@ public class ContextAwareScrollPanel extends JPanel implements IContextUpdateLis
     public static final Color CURL_BELOW_COLOR = new Color(0, 255, 0);
     public static final Color SCROLL_MARK_COLOR = new Color(255, 0, 0);
 
+    int scale = 1;
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         NiftiVolume volume = getCurrentContext().getVolumeWrapper().getVolume();
         if (volume != null) {
-            int height = volume.header.dim[1] * 2;
-            int minScroll = getCurrentContext().getMinDimension().getCurrent() * 2;
-            int maxScroll = getCurrentContext().getMaxDimension().getCurrent() * 2;
+            int height = volume.header.dim[1] * scale;
+            int minScroll = getCurrentContext().getMinDimension().getCurrent() * scale;
+            int maxScroll = getCurrentContext().getMaxDimension().getCurrent() * scale;
 
             g.setColor(CUT_ABOVE_COLOR);
             g.fillRect(2, 0, 2, height - maxScroll);
@@ -37,7 +39,7 @@ public class ContextAwareScrollPanel extends JPanel implements IContextUpdateLis
             g.setColor(CURL_BELOW_COLOR);
             g.fillRect(2, height - minScroll, 2, minScroll);
 
-            int scrollPosition = height - getCurrentContext().getScroll().getCurrent() * 2;
+            int scrollPosition = height - getCurrentContext().getScroll().getCurrent() * scale;
 
             g.setColor(SCROLL_MARK_COLOR);
             g.fillRect(0, scrollPosition, 6, 4);
@@ -47,7 +49,7 @@ public class ContextAwareScrollPanel extends JPanel implements IContextUpdateLis
     @Override
     public void processUpdate(BucketContext context) {
         if (context.getVolumeWrapper().hasChanged() && getCurrentContext().getVolumeWrapper().getVolume() != null) {
-            setPreferredSize(new Dimension(6, getCurrentContext().getVolumeWrapper().getVolume().header.dim[1] * 2));
+            setPreferredSize(new Dimension(6, getCurrentContext().getVolumeWrapper().getVolume().header.dim[1] * scale));
             repaint();
             return;
         }
